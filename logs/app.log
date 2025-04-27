@@ -1,0 +1,875 @@
+2025-04-27 23:50:54.167 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:50:54.763 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:52:42.909 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:53:07.775 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:53:39.679 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:53:41.487 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:53:53.672 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:53:54.259 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:54:20.125 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:54:39.941 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:55:01.874 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:55:29.757 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:55:29.761 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:55:42.624 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:55:42.628 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:56:56.722 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:56:56.724 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:57:00.475 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:57:00.478 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:58:30.563 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:58:30.566 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:58:40.401 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:58:40.403 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:58:46.510 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:58:46.513 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:58:47.084 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:58:47.087 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-27 23:58:49.805 | INFO     | views.visual_dashboard:update_dashboard:524 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:00:32.325 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:00:32.328 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:00:42.128 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:00:42.133 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:00:43.203 | INFO     | views.visual_dashboard:update_dashboard:524 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:00:55.382 | INFO     | views.visual_dashboard:update_dashboard:524 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:00:56.664 | INFO     | views.visual_dashboard:update_dashboard:524 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:00:57.039 | INFO     | views.visual_dashboard:update_dashboard:524 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:00:57.308 | INFO     | views.visual_dashboard:update_dashboard:524 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:00:57.558 | INFO     | views.visual_dashboard:update_dashboard:524 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:00:57.777 | INFO     | views.visual_dashboard:update_dashboard:524 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:00:57.987 | INFO     | views.visual_dashboard:update_dashboard:524 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:00:59.816 | INFO     | views.visual_dashboard:update_dashboard:524 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-01-28 01:00:00      2744.7      2749.7     2742.8       2744.8
+1       gold 2025-01-28 02:00:00      2744.5      2745.2     2741.9       2742.8
+2       gold 2025-01-28 03:00:00      2742.9      2745.4     2740.8       2741.7
+3       gold 2025-01-28 04:00:00      2741.7      2744.8     2741.4       2744.8
+4       gold 2025-01-28 05:00:00      2746.2      2748.7     2744.7       2744.9
+2025-04-28 00:01:01.913 | INFO     | views.visual_dashboard:update_dashboard:524 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-01-28 01:00:00      2744.7      2749.7     2742.8       2744.8
+1       gold 2025-01-28 02:00:00      2744.5      2745.2     2741.9       2742.8
+2       gold 2025-01-28 03:00:00      2742.9      2745.4     2740.8       2741.7
+3       gold 2025-01-28 04:00:00      2741.7      2744.8     2741.4       2744.8
+4       gold 2025-01-28 05:00:00      2746.2      2748.7     2744.7       2744.9
+2025-04-28 00:01:22.532 | INFO     | views.visual_dashboard:update_dashboard:524 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-01-28 01:00:00      2744.7      2749.7     2742.8       2744.8
+1       gold 2025-01-28 02:00:00      2744.5      2745.2     2741.9       2742.8
+2       gold 2025-01-28 03:00:00      2742.9      2745.4     2740.8       2741.7
+3       gold 2025-01-28 04:00:00      2741.7      2744.8     2741.4       2744.8
+4       gold 2025-01-28 05:00:00      2746.2      2748.7     2744.7       2744.9
+2025-04-28 00:01:26.134 | INFO     | views.visual_dashboard:update_dashboard:524 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-01-28 01:00:00      2744.7      2749.7     2742.8       2744.8
+1       gold 2025-01-28 02:00:00      2744.5      2745.2     2741.9       2742.8
+2       gold 2025-01-28 03:00:00      2742.9      2745.4     2740.8       2741.7
+3       gold 2025-01-28 04:00:00      2741.7      2744.8     2741.4       2744.8
+4       gold 2025-01-28 05:00:00      2746.2      2748.7     2744.7       2744.9
+2025-04-28 00:01:30.267 | INFO     | views.visual_dashboard:update_dashboard:524 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-01-28 01:00:00      2744.7      2749.7     2742.8       2744.8
+1       gold 2025-01-28 02:00:00      2744.5      2745.2     2741.9       2742.8
+2       gold 2025-01-28 03:00:00      2742.9      2745.4     2740.8       2741.7
+3       gold 2025-01-28 04:00:00      2741.7      2744.8     2741.4       2744.8
+4       gold 2025-01-28 05:00:00      2746.2      2748.7     2744.7       2744.9
+2025-04-28 00:02:56.504 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:02:56.506 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:02:59.278 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:02:59.280 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:03:09.120 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:03:09.123 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:03:10.905 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:03:10.908 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:03:19.076 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:03:21.604 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:03:24.105 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:03:24.617 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:03:24.909 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:03:25.249 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:03:25.711 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:03:42.878 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:03:42.881 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:03:45.141 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:04:10.713 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:04:10.716 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:04:17.498 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:04:17.500 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:04:18.417 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:04:49.447 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:04:49.450 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:04:51.113 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:05:05.287 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:05:05.289 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:05:07.238 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:05:11.116 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:05:11.843 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:05:12.449 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:05:13.570 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:05:18.020 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:05:19.103 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:05:19.106 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:05:19.154 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:05:25.317 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:05:26.004 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:05:30.459 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:05:48.984 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:05:48.986 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:05:52.373 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:05:54.830 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:05:58.812 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:05:58.814 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:06:12.596 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:06:12.598 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:06:15.353 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:06:15.356 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:06:17.034 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:06:19.320 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:06:19.983 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:06:20.522 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:06:44.963 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:06:44.965 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:06:45.563 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:06:45.567 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:06:46.659 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:09:14.960 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:09:14.963 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:09:16.758 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:09:16.760 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:09:21.193 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:09:26.313 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:09:27.049 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:09:27.598 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:09:34.588 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:09:34.591 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:09:36.010 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:09:37.142 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:09:37.609 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:09:37.851 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:09:42.977 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:09:49.460 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:09:50.008 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:09:50.464 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:09:51.323 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:09:52.024 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:09:52.760 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:10:02.048 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:10:02.605 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:10:03.159 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:10:03.705 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:10:04.266 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:10:59.766 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:10:59.768 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:11:04.111 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:11:20.618 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:11:20.620 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:11:20.885 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:11:31.407 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:11:31.411 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:11:33.817 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:12:21.264 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:12:21.268 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:12:21.854 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:12:21.857 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:12:24.891 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:12:26.166 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:12:26.668 | INFO     | views.visual_dashboard:update_dashboard:527 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:12:32.696 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:12:32.698 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:12:35.443 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:12:35.445 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:12:58.402 | INFO     | views.visual_dashboard:update_dashboard:528 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:13:03.975 | INFO     | views.visual_dashboard:update_dashboard:528 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:13:15.163 | INFO     | views.visual_dashboard:update_dashboard:528 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:13:18.780 | INFO     | views.visual_dashboard:update_dashboard:528 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:13:21.187 | INFO     | views.visual_dashboard:update_dashboard:528 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:13:27.781 | INFO     | views.visual_dashboard:update_dashboard:528 - DataFrame head before plotting:\n  metal_type           timestamp  open_price  high_price  low_price  close_price
+0       gold 2025-03-30 22:00:00      3118.8      3128.3     3091.0       3123.0
+1       gold 2025-03-30 23:00:00      3123.2      3124.9     3094.7       3123.5
+2       gold 2025-03-31 00:00:00      3123.4      3123.9     3086.0       3114.7
+3       gold 2025-03-31 01:00:00      3114.8      3129.1     3087.0       3127.6
+4       gold 2025-03-31 02:00:00      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:16.629 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:14:16.633 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:14:33.449 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:14:33.452 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:14:43.300 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:14:43.303 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:14:46.169 | INFO     | views.visual_dashboard:get_price_data:410 - Retrieved data shape: (437, 5)
+2025-04-28 00:14:46.170 | INFO     | views.visual_dashboard:get_price_data:411 - Data index: timestamp
+2025-04-28 00:14:46.174 | INFO     | views.visual_dashboard:get_price_data:412 - DataFrame sample:
+                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:46.180 | INFO     | views.visual_dashboard:update_dashboard:532 - DataFrame head before plotting:\n                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:46.180 | INFO     | views.visual_dashboard:create_time_series_chart:607 - Creating time series chart, df shape: (437, 5)
+2025-04-28 00:14:46.181 | INFO     | views.visual_dashboard:create_time_series_chart:608 - DataFrame columns: Index(['metal_type', 'open_price', 'high_price', 'low_price', 'close_price'], dtype='object')
+2025-04-28 00:14:46.185 | INFO     | views.visual_dashboard:create_time_series_chart:613 - First few rows of data:
+                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:46.373 | INFO     | views.visual_dashboard:create_time_series_chart:650 - Time series chart created successfully
+2025-04-28 00:14:46.981 | INFO     | views.visual_dashboard:get_price_data:410 - Retrieved data shape: (437, 5)
+2025-04-28 00:14:46.981 | INFO     | views.visual_dashboard:get_price_data:411 - Data index: timestamp
+2025-04-28 00:14:46.984 | INFO     | views.visual_dashboard:get_price_data:412 - DataFrame sample:
+                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:46.989 | INFO     | views.visual_dashboard:update_dashboard:532 - DataFrame head before plotting:\n                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:46.990 | INFO     | views.visual_dashboard:create_time_series_chart:607 - Creating time series chart, df shape: (437, 5)
+2025-04-28 00:14:46.990 | INFO     | views.visual_dashboard:create_time_series_chart:608 - DataFrame columns: Index(['metal_type', 'open_price', 'high_price', 'low_price', 'close_price'], dtype='object')
+2025-04-28 00:14:46.994 | INFO     | views.visual_dashboard:create_time_series_chart:613 - First few rows of data:
+                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:47.021 | INFO     | views.visual_dashboard:create_time_series_chart:650 - Time series chart created successfully
+2025-04-28 00:14:47.499 | INFO     | views.visual_dashboard:get_price_data:410 - Retrieved data shape: (437, 5)
+2025-04-28 00:14:47.499 | INFO     | views.visual_dashboard:get_price_data:411 - Data index: timestamp
+2025-04-28 00:14:47.503 | INFO     | views.visual_dashboard:get_price_data:412 - DataFrame sample:
+                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:47.507 | INFO     | views.visual_dashboard:update_dashboard:532 - DataFrame head before plotting:\n                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:47.508 | INFO     | views.visual_dashboard:create_time_series_chart:607 - Creating time series chart, df shape: (437, 5)
+2025-04-28 00:14:47.509 | INFO     | views.visual_dashboard:create_time_series_chart:608 - DataFrame columns: Index(['metal_type', 'open_price', 'high_price', 'low_price', 'close_price'], dtype='object')
+2025-04-28 00:14:47.513 | INFO     | views.visual_dashboard:create_time_series_chart:613 - First few rows of data:
+                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:47.538 | INFO     | views.visual_dashboard:create_time_series_chart:650 - Time series chart created successfully
+2025-04-28 00:14:47.984 | INFO     | views.visual_dashboard:get_price_data:410 - Retrieved data shape: (437, 5)
+2025-04-28 00:14:47.984 | INFO     | views.visual_dashboard:get_price_data:411 - Data index: timestamp
+2025-04-28 00:14:47.988 | INFO     | views.visual_dashboard:get_price_data:412 - DataFrame sample:
+                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:47.994 | INFO     | views.visual_dashboard:update_dashboard:532 - DataFrame head before plotting:\n                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:47.994 | INFO     | views.visual_dashboard:create_time_series_chart:607 - Creating time series chart, df shape: (437, 5)
+2025-04-28 00:14:47.995 | INFO     | views.visual_dashboard:create_time_series_chart:608 - DataFrame columns: Index(['metal_type', 'open_price', 'high_price', 'low_price', 'close_price'], dtype='object')
+2025-04-28 00:14:47.999 | INFO     | views.visual_dashboard:create_time_series_chart:613 - First few rows of data:
+                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:48.025 | INFO     | views.visual_dashboard:create_time_series_chart:650 - Time series chart created successfully
+2025-04-28 00:14:48.394 | INFO     | views.visual_dashboard:get_price_data:410 - Retrieved data shape: (437, 5)
+2025-04-28 00:14:48.394 | INFO     | views.visual_dashboard:get_price_data:411 - Data index: timestamp
+2025-04-28 00:14:48.398 | INFO     | views.visual_dashboard:get_price_data:412 - DataFrame sample:
+                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:48.404 | INFO     | views.visual_dashboard:update_dashboard:532 - DataFrame head before plotting:\n                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:48.405 | INFO     | views.visual_dashboard:create_time_series_chart:607 - Creating time series chart, df shape: (437, 5)
+2025-04-28 00:14:48.406 | INFO     | views.visual_dashboard:create_time_series_chart:608 - DataFrame columns: Index(['metal_type', 'open_price', 'high_price', 'low_price', 'close_price'], dtype='object')
+2025-04-28 00:14:48.410 | INFO     | views.visual_dashboard:create_time_series_chart:613 - First few rows of data:
+                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:48.434 | INFO     | views.visual_dashboard:create_time_series_chart:650 - Time series chart created successfully
+2025-04-28 00:14:48.735 | INFO     | views.visual_dashboard:get_price_data:410 - Retrieved data shape: (437, 5)
+2025-04-28 00:14:48.735 | INFO     | views.visual_dashboard:get_price_data:411 - Data index: timestamp
+2025-04-28 00:14:48.739 | INFO     | views.visual_dashboard:get_price_data:412 - DataFrame sample:
+                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:48.743 | INFO     | views.visual_dashboard:update_dashboard:532 - DataFrame head before plotting:\n                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:48.744 | INFO     | views.visual_dashboard:create_time_series_chart:607 - Creating time series chart, df shape: (437, 5)
+2025-04-28 00:14:48.744 | INFO     | views.visual_dashboard:create_time_series_chart:608 - DataFrame columns: Index(['metal_type', 'open_price', 'high_price', 'low_price', 'close_price'], dtype='object')
+2025-04-28 00:14:48.748 | INFO     | views.visual_dashboard:create_time_series_chart:613 - First few rows of data:
+                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:48.772 | INFO     | views.visual_dashboard:create_time_series_chart:650 - Time series chart created successfully
+2025-04-28 00:14:49.887 | INFO     | views.visual_dashboard:get_price_data:410 - Retrieved data shape: (437, 5)
+2025-04-28 00:14:49.887 | INFO     | views.visual_dashboard:get_price_data:411 - Data index: timestamp
+2025-04-28 00:14:49.892 | INFO     | views.visual_dashboard:get_price_data:412 - DataFrame sample:
+                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:49.898 | INFO     | views.visual_dashboard:update_dashboard:532 - DataFrame head before plotting:\n                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:49.899 | INFO     | views.visual_dashboard:create_time_series_chart:607 - Creating time series chart, df shape: (437, 5)
+2025-04-28 00:14:49.899 | INFO     | views.visual_dashboard:create_time_series_chart:608 - DataFrame columns: Index(['metal_type', 'open_price', 'high_price', 'low_price', 'close_price'], dtype='object')
+2025-04-28 00:14:49.903 | INFO     | views.visual_dashboard:create_time_series_chart:613 - First few rows of data:
+                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:49.929 | INFO     | views.visual_dashboard:create_time_series_chart:650 - Time series chart created successfully
+2025-04-28 00:14:51.395 | INFO     | views.visual_dashboard:get_price_data:410 - Retrieved data shape: (437, 5)
+2025-04-28 00:14:51.395 | INFO     | views.visual_dashboard:get_price_data:411 - Data index: timestamp
+2025-04-28 00:14:51.399 | INFO     | views.visual_dashboard:get_price_data:412 - DataFrame sample:
+                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:51.407 | INFO     | views.visual_dashboard:update_dashboard:532 - DataFrame head before plotting:\n                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:51.408 | INFO     | views.visual_dashboard:create_time_series_chart:607 - Creating time series chart, df shape: (437, 5)
+2025-04-28 00:14:51.408 | INFO     | views.visual_dashboard:create_time_series_chart:608 - DataFrame columns: Index(['metal_type', 'open_price', 'high_price', 'low_price', 'close_price'], dtype='object')
+2025-04-28 00:14:51.413 | INFO     | views.visual_dashboard:create_time_series_chart:613 - First few rows of data:
+                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:51.436 | INFO     | views.visual_dashboard:create_time_series_chart:650 - Time series chart created successfully
+2025-04-28 00:14:52.040 | INFO     | views.visual_dashboard:get_price_data:410 - Retrieved data shape: (437, 5)
+2025-04-28 00:14:52.041 | INFO     | views.visual_dashboard:get_price_data:411 - Data index: timestamp
+2025-04-28 00:14:52.045 | INFO     | views.visual_dashboard:get_price_data:412 - DataFrame sample:
+                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:52.052 | INFO     | views.visual_dashboard:update_dashboard:532 - DataFrame head before plotting:\n                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:52.053 | INFO     | views.visual_dashboard:create_time_series_chart:607 - Creating time series chart, df shape: (437, 5)
+2025-04-28 00:14:52.053 | INFO     | views.visual_dashboard:create_time_series_chart:608 - DataFrame columns: Index(['metal_type', 'open_price', 'high_price', 'low_price', 'close_price'], dtype='object')
+2025-04-28 00:14:52.057 | INFO     | views.visual_dashboard:create_time_series_chart:613 - First few rows of data:
+                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:52.082 | INFO     | views.visual_dashboard:create_time_series_chart:650 - Time series chart created successfully
+2025-04-28 00:14:52.559 | INFO     | views.visual_dashboard:get_price_data:410 - Retrieved data shape: (437, 5)
+2025-04-28 00:14:52.560 | INFO     | views.visual_dashboard:get_price_data:411 - Data index: timestamp
+2025-04-28 00:14:52.563 | INFO     | views.visual_dashboard:get_price_data:412 - DataFrame sample:
+                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:52.569 | INFO     | views.visual_dashboard:update_dashboard:532 - DataFrame head before plotting:\n                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:52.569 | INFO     | views.visual_dashboard:create_time_series_chart:607 - Creating time series chart, df shape: (437, 5)
+2025-04-28 00:14:52.569 | INFO     | views.visual_dashboard:create_time_series_chart:608 - DataFrame columns: Index(['metal_type', 'open_price', 'high_price', 'low_price', 'close_price'], dtype='object')
+2025-04-28 00:14:52.573 | INFO     | views.visual_dashboard:create_time_series_chart:613 - First few rows of data:
+                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:52.597 | INFO     | views.visual_dashboard:create_time_series_chart:650 - Time series chart created successfully
+2025-04-28 00:14:53.079 | INFO     | views.visual_dashboard:get_price_data:410 - Retrieved data shape: (437, 5)
+2025-04-28 00:14:53.079 | INFO     | views.visual_dashboard:get_price_data:411 - Data index: timestamp
+2025-04-28 00:14:53.083 | INFO     | views.visual_dashboard:get_price_data:412 - DataFrame sample:
+                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:53.089 | INFO     | views.visual_dashboard:update_dashboard:532 - DataFrame head before plotting:\n                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:53.090 | INFO     | views.visual_dashboard:create_time_series_chart:607 - Creating time series chart, df shape: (437, 5)
+2025-04-28 00:14:53.090 | INFO     | views.visual_dashboard:create_time_series_chart:608 - DataFrame columns: Index(['metal_type', 'open_price', 'high_price', 'low_price', 'close_price'], dtype='object')
+2025-04-28 00:14:53.095 | INFO     | views.visual_dashboard:create_time_series_chart:613 - First few rows of data:
+                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:53.119 | INFO     | views.visual_dashboard:create_time_series_chart:650 - Time series chart created successfully
+2025-04-28 00:14:53.600 | INFO     | views.visual_dashboard:get_price_data:410 - Retrieved data shape: (437, 5)
+2025-04-28 00:14:53.600 | INFO     | views.visual_dashboard:get_price_data:411 - Data index: timestamp
+2025-04-28 00:14:53.605 | INFO     | views.visual_dashboard:get_price_data:412 - DataFrame sample:
+                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:53.611 | INFO     | views.visual_dashboard:update_dashboard:532 - DataFrame head before plotting:\n                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:53.612 | INFO     | views.visual_dashboard:create_time_series_chart:607 - Creating time series chart, df shape: (437, 5)
+2025-04-28 00:14:53.612 | INFO     | views.visual_dashboard:create_time_series_chart:608 - DataFrame columns: Index(['metal_type', 'open_price', 'high_price', 'low_price', 'close_price'], dtype='object')
+2025-04-28 00:14:53.617 | INFO     | views.visual_dashboard:create_time_series_chart:613 - First few rows of data:
+                    metal_type  open_price  high_price  low_price  close_price
+timestamp                                                                     
+2025-03-30 22:00:00       gold      3118.8      3128.3     3091.0       3123.0
+2025-03-30 23:00:00       gold      3123.2      3124.9     3094.7       3123.5
+2025-03-31 00:00:00       gold      3123.4      3123.9     3086.0       3114.7
+2025-03-31 01:00:00       gold      3114.8      3129.1     3087.0       3127.6
+2025-03-31 02:00:00       gold      3127.5      3140.2     3100.3       3138.8
+2025-04-28 00:14:53.641 | INFO     | views.visual_dashboard:create_time_series_chart:650 - Time series chart created successfully
+2025-04-28 00:14:57.194 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:14:57.196 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:15:00.972 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
+2025-04-28 00:15:00.974 | INFO     | database.data_collector:__init__:30 - DataCollector initialized with database connection
