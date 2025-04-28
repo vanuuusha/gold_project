@@ -1,0 +1,34 @@
+@media print {
+    .no-print, .no-print * {
+        display: none !important;
+    }
+    body {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    .dash-table-container table {
+        page-break-inside: avoid;
+    }
+}
+
+/* Styles for notifications */
+#export-notification {
+    padding: 8px;
+    border-radius: 4px;
+    margin-top: 10px;
+    text-align: center;
+    font-style: italic;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease;
+    background-color: #f0f0f0;
+    border: 1px dashed #ccc;
+    color: #666;
+    cursor: default;
+}
+
+/* For dark mode */
+.dbc-dark #export-notification {
+    background-color: #2a2a2a;
+    border-color: #444;
+    color: #aaa;
+} 

@@ -30,10 +30,8 @@ Base = declarative_base()
 # Определение перечисления типов металлов
 class MetalType(enum.Enum):
     GOLD = "gold"
-    SILVER = "silver"
-    PLATINUM = "platinum"
-    PALLADIUM = "palladium"
     COPPER = "copper"
+    ALUMINUM = "aluminum"
 
 
 # Определение перечисления источников данных
@@ -130,6 +128,8 @@ class CollectorSchedule(Base):
         """Возвращает интервал в минутах на основе interval_type"""
         if self.interval_type == "daily":
             return 24 * 60  # 24 часа в минутах
+        elif self.interval_type == "weekly":
+            return 7 * 24 * 60  # 7 дней в минутах
         else:
             return 60  # 1 час в минутах
 
@@ -171,8 +171,13 @@ def drop_all_tables(engine):
         raise
 
 
-def init_database():
-    """Инициализация базы данных путем удаления и создания таблиц заново"""
+def init_database(force_reset_schedules=False):
+    """
+    Инициализация базы данных путем удаления и создания таблиц заново
+
+    Args:
+        force_reset_schedules (bool): Если True, существующие расписания будут удалены и созданы заново
+    """
     # Создание соединения с базой данных используя SQLAlchemy
     engine = create_engine(
         DB_URL,
@@ -209,41 +214,8 @@ def init_database():
             f"База данных инициализирована: {existing_tables_count} из {tables_count} таблиц существует"
         )
 
-        # Добавляем проверку создания структуры для CollectorSchedule
-        try:
-            # Создаем тестовую запись для проверки
-            test_schedule = CollectorSchedule(
-                metal_type=MetalType.GOLD,
-                source=DataSource.YFINANCE,
-                interval_type="hourly",
-                is_active=1,
-            )
-            session.add(test_schedule)
-            session.commit()
-            session.delete(test_schedule)
-            session.commit()
-            logger.info(
-                "Структура таблицы CollectorSchedule проверена и соответствует модели"
-            )
-        except Exception as e:
-            logger.error(f"Ошибка при проверке структуры CollectorSchedule: {e}")
-            # Если произошла ошибка, принудительно пересоздаем таблицу
-            logger.info("Попытка пересоздания таблицы CollectorSchedule...")
-            try:
-                # Удаление и пересоздание таблицы
-                with engine.connect() as connection:
-                    connection.execute(text("DROP TABLE IF EXISTS collector_schedules"))
-
-                # Создаем таблицу заново
-                if hasattr(Base.metadata.tables, "collector_schedules"):
-                    Base.metadata.tables["collector_schedules"].create(engine)
-                    logger.info("Таблица CollectorSchedule успешно пересоздана")
-                else:
-                    logger.error(
-                        "Не удалось найти определение таблицы collector_schedules"
-                    )
-            except Exception as recreate_error:
-                logger.error(f"Ошибка при пересоздании таблицы: {recreate_error}")
+        # Проверка и создание расписаний
+        init_schedules(session, force_reset=force_reset_schedules)
 
         # Применение изменений
         session.commit()
@@ -252,6 +224,94 @@ def init_database():
         logger.error(f"Ошибка инициализации базы данных: {e}")
     finally:
         session.close()
+
+
+def init_schedules(session, force_reset=False):
+    """
+    Инициализация расписаний сбора данных для каждой комбинации металла и источника
+
+    Args:
+        session: Сессия SQLAlchemy
+        force_reset (bool): Если True, существующие расписания будут удалены и созданы заново
+    """
+    try:
+        # Проверяем, есть ли уже расписания в таблице
+        existing_count = session.query(CollectorSchedule).count()
+        logger.info(f"В базе найдено {existing_count} расписаний")
+
+        if existing_count > 0 and force_reset:
+            # Удаляем все расписания
+            session.query(CollectorSchedule).delete()
+            session.commit()
+            logger.info("Все существующие расписания удалены")
+            # Теперь создаем заново
+            create_default_schedules(session)
+        elif existing_count == 0:
+            # Если расписаний нет, создаем их
+            create_default_schedules(session)
+
+    except Exception as e:
+        logger.error(f"Ошибка инициализации расписаний: {e}")
+        # Пытаемся восстановить структуру таблицы, если возникла ошибка
+        try:
+            # Удаление и пересоздание таблицы
+            engine = session.get_bind()
+            with engine.connect() as connection:
+                connection.execute(text("DROP TABLE IF EXISTS collector_schedules"))
+
+            # Создаем таблицу заново
+            if hasattr(Base.metadata.tables, "collector_schedules"):
+                Base.metadata.tables["collector_schedules"].create(engine)
+                logger.info("Таблица CollectorSchedule успешно пересоздана")
+
+                # Создаем начальные расписания после пересоздания таблицы
+                create_default_schedules(session)
+            else:
+                logger.error("Не удалось найти определение таблицы collector_schedules")
+        except Exception as recreate_error:
+            logger.error(f"Ошибка при пересоздании таблицы: {recreate_error}")
+
+
+def create_default_schedules(session):
+    """
+    Создает начальные расписания с часовым интервалом для каждого металла и источника
+
+    Args:
+        session: Сессия SQLAlchemy
+    """
+    logger.info("Создание начальных расписаний с часовым интервалом")
+
+    # Создаем расписания для каждой комбинации металла и источника
+    schedules_created = 0
+
+    for metal_type in MetalType:
+        for source in DataSource:
+            # Пропускаем некоторые невалидные комбинации
+            if source == DataSource.ALPHAVANTAGE_API and metal_type == MetalType.COPPER:
+                continue
+
+            # Создаем расписание с часовым интервалом
+            # По умолчанию активно только расписание для Gold из YFinance
+            is_active = (
+                1
+                if (metal_type == MetalType.GOLD and source == DataSource.YFINANCE)
+                else 0
+            )
+
+            schedule = CollectorSchedule(
+                metal_type=metal_type,
+                source=source,
+                interval_type="hourly",
+                is_active=is_active,
+            )
+
+            session.add(schedule)
+            schedules_created += 1
+
+    session.commit()
+    logger.info(
+        f"Создано {schedules_created} начальных расписаний с часовым интервалом"
+    )
 
 
 if __name__ == "__main__":

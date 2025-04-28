@@ -7,15 +7,30 @@ import sys
 import os
 from alpha_vantage.timeseries import TimeSeries
 
+# Constants
+ALPHA_VANTAGE_API_KEY = (
+    "YOUR_ALPHA_VANTAGE_API_KEY"  # Замените на ваш настоящий ключ API
+)
+
 # Add parent directory to path if script is run directly
 if __name__ == "__main__":
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    from database.init_database import MetalType, DataSource, MetalPrice
-    from settings import DB_URL, ALPHA_VANTAGE_API_KEY
+    from database.init_database import (
+        MetalType,
+        DataSource,
+        MetalPrice,
+        CollectorSchedule,
+    )
+    from settings import DB_URL
 else:
     # Import when module is imported from elsewhere
-    from database.init_database import MetalType, DataSource, MetalPrice
-    from settings import DB_URL, ALPHA_VANTAGE_API_KEY
+    from database.init_database import (
+        MetalType,
+        DataSource,
+        MetalPrice,
+        CollectorSchedule,
+    )
+    from settings import DB_URL
 
 from loguru import logger
 
@@ -86,15 +101,8 @@ class DataCollector:
         """Map ticker to MetalType enum based on platform"""
         if platform_type.lower() == "alphavantage":
             metal_map = {
-                "XAU": MetalType.GOLD,
-                "XAUUSD": MetalType.GOLD,
-                "XAG": MetalType.SILVER,
-                "XAGUSD": MetalType.SILVER,
-                "XPT": MetalType.PLATINUM,
-                "XPTUSD": MetalType.PLATINUM,
-                "XPD": MetalType.PALLADIUM,
-                "XPDUSD": MetalType.PALLADIUM,
                 "COPPER": MetalType.COPPER,
+                "ALUMINUM": MetalType.ALUMINUM,
             }
             if ticker not in metal_map:
                 logger.error(f"Unsupported metal ticker: {ticker}")
@@ -104,10 +112,8 @@ class DataCollector:
         elif platform_type.lower() == "yfinance":
             metal_map = {
                 "GC=F": MetalType.GOLD,
-                "SI=F": MetalType.SILVER,
-                "PL=F": MetalType.PLATINUM,
-                "PA=F": MetalType.PALLADIUM,
                 "HG=F": MetalType.COPPER,
+                "ALI=F": MetalType.ALUMINUM,  # Aluminum futures
             }
             metal_type = metal_map.get(ticker)
             if not metal_type:
@@ -299,37 +305,37 @@ class DataCollector:
             # Batch size for database operations
             batch_size = 5000
 
-            # Since Alpha Vantage free tier is limited for metals data,
-            # and their demo API key doesn't support forex data for metals,
-            # we'll use a simulated approach based on cryptocurrencies
             try:
-                # Use cryptocurrency API as an alternative for demo purposes
-                # This provides similar structured data
-                response = requests.get(
-                    f"https://www.alphavantage.co/query?function=DIGITAL_CURRENCY_DAILY&symbol=BTC&market=USD&apikey={ALPHA_VANTAGE_API_KEY}"
-                )
+                # Используем прямые URL для данных металлов
+                api_url = f"https://www.alphavantage.co/query?function={ticker}&interval=monthly&apikey={ALPHA_VANTAGE_API_KEY}"
+
+                logger.info(f"Запрашиваем данные по URL: {api_url}")
+                response = requests.get(api_url)
                 data = response.json()
 
                 if "Error Message" in data:
                     logger.error(f"Alpha Vantage API error: {data['Error Message']}")
                     raise ValueError(data["Error Message"])
 
-                if "Time Series (Digital Currency Daily)" not in data:
+                # Проверяем наличие данных
+                if "name" not in data or "data" not in data:
                     logger.error(f"Unexpected API response format: {data.keys()}")
                     raise ValueError("Unexpected API response format")
 
-                # Extract time series data
-                time_series = data["Time Series (Digital Currency Daily)"]
+                logger.info(f"Получены данные для {data['name']}")
+
+                # Извлекаем временные ряды данных
+                time_series_data = data["data"]
                 logger.info(
-                    f"Retrieved {len(time_series)} daily data points from Alpha Vantage"
+                    f"Получено {len(time_series_data)} точек данных от Alpha Vantage"
                 )
 
-                # Prepare batch records for processing
+                # Готовим пакетные записи для обработки
                 batch_records = []
                 total_hours = len(missing_hours)
                 hours_with_data = 0
 
-                # Group missing hours by date to match with daily data
+                # Группируем пропущенные часы по датам для сопоставления с ежедневными данными
                 missing_dates = {}
                 for hour in missing_hours:
                     date_str = hour.strftime("%Y-%m-%d")
@@ -337,120 +343,70 @@ class DataCollector:
                         missing_dates[date_str] = []
                     missing_dates[date_str].append(hour)
 
-                # Process data from Alpha Vantage
-                # Use our simulation mapping to adjust prices to match metal prices
-                price_factor = {
-                    MetalType.GOLD: 0.05,  # BTC price * 0.05 ~ gold price range
-                    MetalType.SILVER: 0.0006,  # BTC price * 0.0006 ~ silver price range
-                    MetalType.PLATINUM: 0.025,  # BTC price * 0.025 ~ platinum price range
-                    MetalType.PALLADIUM: 0.02,  # BTC price * 0.02 ~ palladium price range
-                    MetalType.COPPER: 0.0001,  # BTC price * 0.0001 ~ copper price range
-                }.get(
-                    metal_type, 0.05
-                )  # Default to gold factor
+                # Обрабатываем данные Alpha Vantage
+                # Создаем словарь дат и цен для быстрого доступа
+                price_by_date = {}
+                for entry in time_series_data:
+                    # Проверяем, что у нас есть и дата, и значение цены
+                    if "date" in entry and "value" in entry and entry["value"] != ".":
+                        try:
+                            # Преобразуем дату в формат YYYY-MM-DD
+                            date_obj = datetime.strptime(entry["date"], "%Y-%m-%d")
+                            date_str = date_obj.strftime("%Y-%m-%d")
 
-                # Get a sample entry to determine the key format
-                sample_date = next(iter(time_series))
-                sample_data = time_series[sample_date]
-                logger.info(f"Sample data keys: {list(sample_data.keys())}")
+                            # Преобразуем значение цены в float
+                            price = float(entry["value"])
 
-                # Check key format
-                if "1. open" in sample_data:
-                    # Standard format (non-crypto)
-                    for date_str, daily_data in time_series.items():
-                        # Check if this date is in our missing hours
-                        if date_str in missing_dates:
-                            # Extract price values and adjust to metal price range
-                            try:
-                                # Get correct keys from the response
-                                open_price = float(daily_data["1. open"]) * price_factor
-                                high_price = float(daily_data["2. high"]) * price_factor
-                                low_price = float(daily_data["3. low"]) * price_factor
-                                close_price = (
-                                    float(daily_data["4. close"]) * price_factor
-                                )
+                            # Сохраняем в словаре
+                            price_by_date[date_str] = price
+                        except (ValueError, TypeError) as e:
+                            logger.error(
+                                f"Ошибка при обработке записи даты {entry}: {e}"
+                            )
 
-                                # Create records for all hours on this date
-                                for hour in missing_dates[date_str]:
-                                    record = MetalPrice(
-                                        metal_type=metal_type,
-                                        timestamp=hour,
-                                        open_price=open_price,
-                                        high_price=high_price,
-                                        low_price=low_price,
-                                        close_price=close_price,
-                                        currency="USD",
-                                        source=DataSource.ALPHAVANTAGE_API,
-                                        is_market_closed=0,  # Data available
-                                    )
-                                    batch_records.append(record)
-                                    hours_with_data += 1
+                # Обработка каждой даты из missing_dates
+                for date_str, hours in list(missing_dates.items()):
+                    # Находим ближайшую предыдущую дату с данными
+                    price = None
+                    date_obj = datetime.strptime(date_str, "%Y-%m-%d")
 
-                                # Remove this date from our map
-                                del missing_dates[date_str]
-                            except Exception as e:
-                                logger.error(
-                                    f"Error processing data for {date_str}: {e}"
-                                )
-                else:
-                    # Crypto format
-                    # Determine the key prefix used in this response
-                    prefix = "1b" if "1b. open (USD)" in sample_data else "1a"
+                    # Если у нас есть цена для этого дня, используем её
+                    if date_str in price_by_date:
+                        price = price_by_date[date_str]
+                    else:
+                        # Ищем ближайшую дату не более 30 дней назад
+                        for i in range(1, 31):
+                            prev_date = (date_obj - timedelta(days=i)).strftime(
+                                "%Y-%m-%d"
+                            )
+                            if prev_date in price_by_date:
+                                price = price_by_date[prev_date]
+                                break
 
-                    for date_str, daily_data in time_series.items():
-                        # Check if this date is in our missing hours
-                        if date_str in missing_dates:
-                            # Extract price values and adjust to metal price range
-                            try:
-                                # Get correct keys from the response
-                                btc_open = float(daily_data[f"{prefix}. open (USD)"])
-                                btc_high = float(
-                                    daily_data[
-                                        f'{prefix.replace("1", "2")}. high (USD)'
-                                    ]
-                                )
-                                btc_low = float(
-                                    daily_data[f'{prefix.replace("1", "3")}. low (USD)']
-                                )
-                                btc_close = float(
-                                    daily_data[
-                                        f'{prefix.replace("1", "4")}. close (USD)'
-                                    ]
-                                )
+                    if price is not None:
+                        # Создаем записи для всех часов этой даты
+                        for hour in hours:
+                            record = MetalPrice(
+                                metal_type=metal_type,
+                                timestamp=hour,
+                                open_price=price,
+                                high_price=price,
+                                low_price=price,
+                                close_price=price,
+                                currency="USD",
+                                source=DataSource.ALPHAVANTAGE_API,
+                                is_market_closed=0,  # Данные доступны
+                            )
+                            batch_records.append(record)
+                            hours_with_data += 1
 
-                                # Adjust to simulate metal price
-                                open_price = btc_open * price_factor
-                                high_price = btc_high * price_factor
-                                low_price = btc_low * price_factor
-                                close_price = btc_close * price_factor
+                        # Удаляем обработанную дату из словаря
+                        del missing_dates[date_str]
 
-                                # Create records for all hours on this date
-                                for hour in missing_dates[date_str]:
-                                    record = MetalPrice(
-                                        metal_type=metal_type,
-                                        timestamp=hour,
-                                        open_price=open_price,
-                                        high_price=high_price,
-                                        low_price=low_price,
-                                        close_price=close_price,
-                                        currency="USD",
-                                        source=DataSource.ALPHAVANTAGE_API,
-                                        is_market_closed=0,  # Data available
-                                    )
-                                    batch_records.append(record)
-                                    hours_with_data += 1
-
-                                # Remove this date from our map
-                                del missing_dates[date_str]
-                            except Exception as e:
-                                logger.error(
-                                    f"Error processing data for {date_str}: {e}"
-                                )
-
-                # Process all hours we didn't find data for
+                # Обрабатываем все часы, для которых не нашли данных
                 for date_hours in missing_dates.values():
                     for hour in date_hours:
-                        # Create empty record
+                        # Создаем пустую запись
                         record = MetalPrice(
                             metal_type=metal_type,
                             timestamp=hour,
@@ -460,11 +416,11 @@ class DataCollector:
                             close_price=None,
                             currency="USD",
                             source=DataSource.ALPHAVANTAGE_API,
-                            is_market_closed=1,  # No data
+                            is_market_closed=1,  # Нет данных
                         )
                         batch_records.append(record)
 
-                # Save all records in batches
+                # Сохраняем все записи пакетами
                 for i in range(0, len(batch_records), batch_size):
                     batch = batch_records[i : i + batch_size]
                     if not self._save_batch_metal_prices(batch):
@@ -1086,6 +1042,130 @@ class DataCollector:
         except Exception as e:
             logger.error(f"Error in _process_yfinance_block: {e}")
             return -1  # Error
+
+    def run_scheduled_tasks(self):
+        """
+        Run scheduled collection tasks based on the collector_schedules table.
+        This should be called from a scheduler at regular intervals (e.g., every hour)
+
+        Returns:
+            dict: A dictionary with metal types as keys and success status as values
+        """
+        try:
+            session = self.Session()
+            results = {}
+
+            # Get all active schedules
+            active_schedules = (
+                session.query(CollectorSchedule)
+                .filter(CollectorSchedule.is_active == 1)
+                .all()
+            )
+
+            if not active_schedules:
+                logger.info("No active schedules found")
+                return {}
+
+            current_time = datetime.now()
+
+            for schedule in active_schedules:
+                # Check if schedule should run now based on interval
+                should_run = False
+
+                # If never run before, run it now
+                if not schedule.last_run:
+                    should_run = True
+                    logger.info(
+                        f"Schedule {schedule.id} has never run before, running now"
+                    )
+                else:
+                    # Calculate minutes since last run
+                    minutes_since_last_run = (
+                        current_time - schedule.last_run
+                    ).total_seconds() / 60
+
+                    # Check if the interval has elapsed
+                    if minutes_since_last_run >= schedule.interval_minutes:
+                        should_run = True
+                        logger.info(
+                            f"Schedule {schedule.id} for {schedule.metal_type.value} from {schedule.source.value}: "
+                            f"{minutes_since_last_run:.1f} minutes elapsed since last run, interval is {schedule.interval_minutes} minutes"
+                        )
+
+                if should_run:
+                    # Get the ticker for this metal and source
+                    ticker = None
+
+                    if schedule.source == DataSource.YFINANCE:
+                        ticker_map = {
+                            MetalType.GOLD: "GC=F",
+                            MetalType.SILVER: "SI=F",
+                            MetalType.PLATINUM: "PL=F",
+                            MetalType.PALLADIUM: "PA=F",
+                            MetalType.COPPER: "HG=F",
+                        }
+                        ticker = ticker_map.get(schedule.metal_type)
+                    elif schedule.source == DataSource.ALPHAVANTAGE_API:
+                        ticker_map = {
+                            MetalType.GOLD: "XAUUSD",
+                            MetalType.SILVER: "XAGUSD",
+                            MetalType.PLATINUM: "XPTUSD",
+                            MetalType.PALLADIUM: "XPDUSD",
+                            MetalType.COPPER: "COPPER",
+                        }
+                        ticker = ticker_map.get(schedule.metal_type)
+
+                    if not ticker:
+                        logger.error(
+                            f"No ticker found for {schedule.metal_type.value} from {schedule.source.value}"
+                        )
+                        results[
+                            f"{schedule.metal_type.value}_{schedule.source.value}"
+                        ] = False
+                        continue
+
+                    # Calculate days back based on interval type
+                    days_back = 1  # Default for hourly
+                    if schedule.interval_type == "daily":
+                        days_back = 2  # Get 2 days of data for daily updates
+                    elif schedule.interval_type == "weekly":
+                        days_back = 8  # Get 8 days of data for weekly updates
+
+                    # Run the update
+                    platform_type = schedule.source.name.lower()
+                    result = self.update(
+                        ticker=ticker, platform_type=platform_type, days_back=days_back
+                    )
+
+                    # Record result
+                    results[f"{schedule.metal_type.value}_{schedule.source.value}"] = (
+                        result
+                    )
+
+                    # Update last_run timestamp if successful
+                    if result:
+                        schedule.last_run = current_time
+                        logger.info(
+                            f"Successfully updated {schedule.metal_type.value} from {schedule.source.value}"
+                        )
+                    else:
+                        logger.error(
+                            f"Failed to update {schedule.metal_type.value} from {schedule.source.value}"
+                        )
+
+            # Commit changes to last_run timestamps
+            session.commit()
+            return results
+
+        except Exception as e:
+            logger.error(f"Error running scheduled tasks: {e}")
+            if "session" in locals():
+                session.rollback()
+            return {"error": str(e)}
+
+        finally:
+            if "session" in locals():
+                session.close()
 
 
 if __name__ == "__main__":
