@@ -1,0 +1,373 @@
+/* Dark theme styling */
+body.dark-mode-active {
+    background-color: #222 !important;
+    color: #f8f9fa !important;
+}
+
+/* Make navbar completely black in dark mode */
+body.dark-mode-active .navbar,
+#navbar.navbar-dark,
+#navbar-data-collection.navbar-dark,
+#navbar-database.navbar-dark {
+    background-color: #000 !important;
+}
+
+/* Set container background in dark mode */
+body.dark-mode-active .container,
+body.dark-mode-active .container-fluid,
+body.dark-mode-active #database-container,
+body.dark-mode-active #dashboard-container,
+body.dark-mode-active #data-collection-container,
+body.dark-mode-active .main-container,
+body.dark-mode-active #main-layout {
+    background-color: #222 !important;
+    color: #f8f9fa !important;
+}
+
+/* Ensure text color in dropdowns */
+body.dark-mode-active .dropdown-menu {
+    background-color: #333;
+    border-color: #444;
+}
+
+body.dark-mode-active .dropdown-item {
+    color: #f8f9fa;
+}
+
+body.dark-mode-active .dropdown-item:hover {
+    background-color: #444;
+}
+
+/* Dark styling for inputs and dropdowns */
+body.dark-mode-active .Select-control,
+body.dark-mode-active .Select-menu-outer,
+body.dark-mode-active .dash-dropdown .Select-menu-outer,
+body.dark-mode-active .DateInput,
+body.dark-mode-active .DateInput_input {
+    background-color: #333;
+    color: #f8f9fa;
+    border-color: #555;
+}
+
+body.dark-mode-active .Select-value-label,
+body.dark-mode-active .Select--single > .Select-control .Select-value,
+body.dark-mode-active .Select-placeholder {
+    color: #f8f9fa !important;
+}
+
+body.dark-mode-active .DateInput_input {
+    color: #f8f9fa !important;
+}
+
+/* Dark styling for form controls */
+body.dark-mode-active .form-control {
+    background-color: #333;
+    color: #f8f9fa;
+    border-color: #555;
+}
+
+body.dark-mode-active .input-group-text {
+    background-color: #2c2c2c;
+    color: #f8f9fa;
+    border-color: #555;
+}
+
+/* Dark styling for checklist and radio */
+body.dark-mode-active .form-check-input {
+    background-color: #333;
+    border-color: #555;
+}
+
+/* Style for buttons in dark mode */
+body.dark-mode-active .btn-light {
+    background-color: #444;
+    border-color: #555;
+    color: #f8f9fa;
+}
+
+body.dark-mode-active .btn-outline-secondary {
+    color: #f8f9fa;
+    border-color: #555;
+}
+
+body.dark-mode-active .btn-outline-secondary:hover {
+    background-color: #444;
+    color: #f8f9fa;
+}
+
+/* Dark styling for plot background */
+body.dark-mode-active .js-plotly-plot .plotly .main-svg {
+    background-color: transparent !important;
+}
+
+body.dark-mode-active .js-plotly-plot .plotly .bg {
+    fill: transparent !important;
+}
+
+/* Ensure plotly charts use their own colors */
+body.dark-mode-active .js-plotly-plot .plotly,
+body.dark-mode-active .js-plotly-plot,
+.dark-mode .js-plotly-plot {
+    background-color: transparent !important;
+}
+
+/* Fix grid visibility for candlestick chart in light mode */
+.js-plotly-plot .plotly .gridlayer path {
+    opacity: 1 !important;
+    stroke-width: 1 !important;
+}
+
+/* Light mode grid color */
+.js-plotly-plot .plotly .gridlayer path {
+    stroke: rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Dark mode grid color */
+body.dark-mode-active .js-plotly-plot .plotly .gridlayer path {
+    stroke: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Candlestick styling for light mode */
+/* Increasing candlestick (green) */
+.js-plotly-plot .plotly .cartesianlayer .plot .js-line {
+    stroke-width: 1px !important;
+}
+
+/* Light mode - Increasing candlestick (green) */
+.js-plotly-plot .plotly .cartesianlayer .plot .increase {
+    fill: rgba(0, 150, 50, 0.6) !important;
+    stroke: rgba(0, 150, 50, 1) !important;
+}
+
+/* Light mode - Decreasing candlestick (red) */
+.js-plotly-plot .plotly .cartesianlayer .plot .decrease {
+    fill: rgba(200, 30, 30, 0.6) !important;
+    stroke: rgba(200, 30, 30, 1) !important;
+}
+
+/* Dark mode - Increasing candlestick (green) */
+body.dark-mode-active .js-plotly-plot .plotly .cartesianlayer .plot .increase {
+    fill: rgba(0, 180, 70, 0.7) !important;
+    stroke: rgba(0, 180, 70, 1) !important;
+}
+
+/* Dark mode - Decreasing candlestick (red) */
+body.dark-mode-active .js-plotly-plot .plotly .cartesianlayer .plot .decrease {
+    fill: rgba(220, 50, 50, 0.7) !important;
+    stroke: rgba(220, 50, 50, 1) !important;
+}
+
+/* Fix mode bar styling (tools panel) */
+.modebar {
+    background-color: transparent !important;
+}
+
+.modebar-btn path {
+    fill: currentColor !important;
+}
+
+/* Light mode modebar */
+.js-plotly-plot .plotly .modebar-container .modebar {
+    opacity: 0.7 !important;
+}
+
+.js-plotly-plot .plotly .modebar-container .modebar-btn {
+    color: #444 !important;
+}
+
+/* Dark mode modebar */
+body.dark-mode-active .js-plotly-plot .plotly .modebar-container .modebar {
+    opacity: 0.9 !important;
+}
+
+body.dark-mode-active .js-plotly-plot .plotly .modebar-container .modebar-btn {
+    color: #f8f9fa !important;
+}
+
+body.dark-mode-active .js-plotly-plot .plotly .modebar-container .modebar-btn:hover {
+    color: #fff !important;
+    background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Dark styling for cards and card elements */
+body.dark-mode-active .card {
+    background-color: #333 !important;
+    border-color: #444 !important;
+    color: #f8f9fa !important;
+}
+
+body.dark-mode-active .card-header {
+    background-color: #2c2c2c !important;
+    border-color: #444 !important;
+}
+
+body.dark-mode-active .card-body {
+    background-color: #333 !important;
+}
+
+/* AG Grid theme customizations */
+.ag-theme-quartz-dark {
+    --ag-background-color: #222;
+    --ag-foreground-color: #f8f9fa;
+    --ag-border-color: #444;
+    --ag-header-background-color: #333;
+    --ag-odd-row-background-color: #2a2a2a;
+    --ag-header-foreground-color: #fff;
+    --ag-row-hover-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Make sure AG Grid elements have dark background in dark mode */
+body.dark-mode-active .ag-root-wrapper,
+body.dark-mode-active .ag-header,
+body.dark-mode-active .ag-header-row,
+body.dark-mode-active .ag-row,
+body.dark-mode-active .ag-header-cell,
+body.dark-mode-active .ag-cell {
+    background-color: #222 !important;
+    color: #f8f9fa !important;
+}
+
+body.dark-mode-active .ag-row-odd {
+    background-color: #2a2a2a !important;
+}
+
+body.dark-mode-active .ag-header-cell {
+    background-color: #333 !important;
+}
+
+.ag-theme-quartz {
+    --ag-background-color: #fff;
+    --ag-foreground-color: #000;
+    --ag-border-color: #ddd;
+    --ag-header-background-color: #f5f5f5;
+    --ag-odd-row-background-color: #fafafa;
+    --ag-header-foreground-color: #333;
+    --ag-row-hover-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure auto-dark theme is supported */
+@media (prefers-color-scheme: dark) {
+    .ag-theme-quartz-auto-dark {
+        --ag-background-color: #222;
+        --ag-foreground-color: #f8f9fa;
+        --ag-border-color: #444;
+        --ag-header-background-color: #333;
+        --ag-odd-row-background-color: #2a2a2a;
+        --ag-header-foreground-color: #fff;
+        --ag-row-hover-color: rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Container styling */
+#dashboard-container {
+    padding: 15px;
+}
+
+/* Dark styling for all applied theme pages */
+#database-page.ag-theme-quartz-dark,
+#data-collection-page.ag-theme-quartz-dark,
+#dashboard-container.ag-theme-quartz-dark {
+    background-color: #222 !important;
+    color: #f8f9fa !important;
+}
+
+/* Light styling for all applied theme pages */
+#database-page.ag-theme-quartz,
+#data-collection-page.ag-theme-quartz,
+#dashboard-container.ag-theme-quartz {
+    background-color: #fff !important;
+    color: #212529 !important;
+}
+
+/* Remove for print */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+}
+
+/* Dark mode and light mode specific classes */
+.dark-mode {
+    background-color: #222 !important;
+    color: #f8f9fa !important;
+}
+
+.light-mode {
+    background-color: #fff !important;
+    color: #212529 !important;
+}
+
+/* Ensure HTML and body have dark background in dark mode */
+html.dark-mode-active,
+body.dark-mode-active,
+.dark-mode {
+    background-color: #222 !important;
+    color: #f8f9fa !important;
+}
+
+/* Make navbar completely black in dark mode */
+body.dark-mode-active .navbar,
+#navbar.navbar-dark,
+#navbar-data-collection.navbar-dark,
+#navbar-database.navbar-dark,
+.dark-mode .navbar {
+    background-color: #000 !important;
+}
+
+/* Set container background in dark mode */
+body.dark-mode-active .container,
+body.dark-mode-active .container-fluid,
+body.dark-mode-active #database-container,
+body.dark-mode-active #dashboard-container,
+body.dark-mode-active #data-collection-container,
+body.dark-mode-active .main-container,
+body.dark-mode-active #main-layout,
+.dark-mode .container,
+.dark-mode .container-fluid {
+    background-color: #222 !important;
+    color: #f8f9fa !important;
+}
+
+/* Keep graph containers transparent */
+body.dark-mode-active .dash-graph,
+.dark-mode .dash-graph,
+body.dark-mode-active .plotly-graph-div,
+.dark-mode .plotly-graph-div,
+body.dark-mode-active .graph-container,
+.dark-mode .graph-container,
+body.dark-mode-active #main-chart,
+body.dark-mode-active #volatility-chart,
+.dark-mode #main-chart,
+.dark-mode #volatility-chart {
+    background-color: transparent !important;
+}
+
+/* Fix scatter plot margins and styling */
+.js-plotly-plot .scatterlayer .trace {
+    opacity: 1 !important;
+}
+
+.js-plotly-plot .scatterlayer .points path {
+    stroke-width: 1.5px !important;
+}
+
+/* Improve scatter plot markers */
+.js-plotly-plot .scatterlayer .points path {
+    opacity: 0.9 !important;
+    stroke-opacity: 1 !important;
+}
+
+/* Improve text annotation visibility */
+.js-plotly-plot .annotation-text {
+    font-weight: 500 !important;
+}
+
+/* Light mode text annotation */
+.js-plotly-plot .annotation-text {
+    color: rgba(0, 0, 0, 0.75) !important;
+}
+
+/* Dark mode text annotation */
+body.dark-mode-active .js-plotly-plot .annotation-text {
+    color: rgba(255, 255, 255, 0.85) !important;
+} 

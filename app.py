@@ -3,10 +3,7 @@ import dash
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import flask
-from flask import Flask, render_template, redirect, url_for
-import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
+from flask import Flask, redirect, url_for
 from datetime import datetime, timedelta
 import os
 from loguru import logger
@@ -16,14 +13,12 @@ import time
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-# Import database models and data collector
+# Импорт моделей базы данных и сборщика данных
 from database.init_database import (
     MetalType,
     DataSource,
     MetalPrice,
     CollectorSchedule,
-    User,
-    UserRequest,
     Base,
     init_database,
     init_schedules,
@@ -31,225 +26,74 @@ from database.init_database import (
 from database.data_collector import DataCollector
 from settings import APP_CONFIG, DB_URL
 
-# Set up loguru logger
 logger.remove()
-logger.add(sys.stdout, format="{time} {level} {message}", level="INFO")
-logger.add("logs/app.log", rotation="10 MB", level="INFO")
+logger.add(sys.stdout, format="{time} {level} {message}", level="DEBUG")
 
-# Create collector
 collector = DataCollector()
 
 
-# Scheduler background thread
 def scheduler_thread():
-    """Background thread that periodically checks for scheduled tasks to run"""
+    """Фоновый поток, периодически проверяющий запланированные задачи"""
     logger.info("Scheduler background thread started")
-
-    while True:
-        try:
-            # Run scheduled tasks
-            logger.info("Checking for scheduled tasks...")
-            results = collector.run_scheduled_tasks()
-
-            if results:
-                logger.info(f"Scheduled tasks executed: {len(results)}")
-                for task, success in results.items():
-                    logger.info(f"Task {task}: {'Success' if success else 'Failed'}")
-            else:
-                logger.info("No scheduled tasks were executed")
-
-            # Sleep for one hour before checking again
-            # In production, this could be more frequent (e.g. every minute)
-            # to ensure we don't miss hourly tasks due to timing issues
-            time.sleep(3600)  # 1 hour
-
-        except Exception as e:
-            logger.error(f"Error in scheduler thread: {e}")
-            # Sleep for a shorter time if there was an error
-            time.sleep(300)  # 5 minutes
+    collector = DataCollector()
+    collector._run_task_scheduler()
 
 
-# Initialize Flask server
+# Инициализация сервера Flask
 server = Flask(__name__)
-server.secret_key = "mysecretkey12345"  # Change this in production
+server.secret_key = "mysecretkey12345"
 
-# Initialize Dash app
 app = Dash(
     __name__,
     server=server,
     external_stylesheets=[dbc.themes.BOOTSTRAP],
-    suppress_callback_exceptions=True,  # This is important for callbacks from different files
+    suppress_callback_exceptions=True,
     routes_pathname_prefix="/dashboard/",
+    title="Precious Metals Analytics",
 )
 
-# Define the main layout with navigation
+_original_dispatch = app.dispatch
+
+
+def _custom_dispatch(self, request_body, request_options=None):
+    try:
+        return _original_dispatch(self, request_body, request_options)
+    except KeyError as e:
+        raise
+
+
+app.dispatch = _custom_dispatch.__get__(app, app.__class__)
+
 app.layout = html.Div(
-    [dcc.Location(id="url", refresh=False), html.Div(id="page-content")]
-)
-
-# Define the home layout
-home_layout = html.Div(
     [
-        dbc.NavbarSimple(
-            children=[
-                dbc.NavItem(dbc.NavLink("Dashboard", href="/dashboard/dashboard")),
-                dbc.NavItem(
-                    dbc.NavLink("Data Collection", href="/dashboard/data-collection")
-                ),
-                dbc.NavItem(
-                    dbc.NavLink("Database Management", href="/dashboard/database")
-                ),
-                dbc.NavItem(dbc.NavLink("Reports", href="/dashboard/reports")),
-            ],
-            brand="Precious Metals Analytics",
-            brand_href="/dashboard/",
-            color="primary",
-            dark=True,
-        ),
-        dbc.Container(
-            [
-                html.H1("Welcome to Precious Metals Analytics", className="my-4"),
-                html.P(
-                    "This application collects and analyzes precious metal prices from various sources."
-                ),
-                html.Hr(),
-                dbc.Row(
-                    [
-                        dbc.Col(
-                            [
-                                dbc.Card(
-                                    [
-                                        dbc.CardHeader("Quick Overview"),
-                                        dbc.CardBody(
-                                            [
-                                                html.P(
-                                                    "View the current status of data collection and latest price information."
-                                                ),
-                                                dbc.Button(
-                                                    "View Dashboard",
-                                                    color="primary",
-                                                    href="/dashboard/dashboard",
-                                                ),
-                                            ]
-                                        ),
-                                    ],
-                                    className="mb-4",
-                                ),
-                            ],
-                            width=6,
-                        ),
-                        dbc.Col(
-                            [
-                                dbc.Card(
-                                    [
-                                        dbc.CardHeader("Data Collection"),
-                                        dbc.CardBody(
-                                            [
-                                                html.P(
-                                                    "Configure data collection schedules and trigger manual updates."
-                                                ),
-                                                dbc.Button(
-                                                    "Data Collection Settings",
-                                                    color="primary",
-                                                    href="/dashboard/data-collection",
-                                                ),
-                                            ]
-                                        ),
-                                    ],
-                                    className="mb-4",
-                                ),
-                            ],
-                            width=6,
-                        ),
-                    ]
-                ),
-                dbc.Row(
-                    [
-                        dbc.Col(
-                            [
-                                dbc.Card(
-                                    [
-                                        dbc.CardHeader("Database Management"),
-                                        dbc.CardBody(
-                                            [
-                                                html.P(
-                                                    "Manage database tables and view stored data."
-                                                ),
-                                                dbc.Button(
-                                                    "Database Management",
-                                                    color="primary",
-                                                    href="/dashboard/database",
-                                                ),
-                                            ]
-                                        ),
-                                    ],
-                                    className="mb-4",
-                                ),
-                            ],
-                            width=6,
-                        ),
-                        dbc.Col(
-                            [
-                                dbc.Card(
-                                    [
-                                        dbc.CardHeader("Reports"),
-                                        dbc.CardBody(
-                                            [
-                                                html.P(
-                                                    "Generate visual and textual reports from collected data."
-                                                ),
-                                                dbc.Button(
-                                                    "Generate Reports",
-                                                    color="primary",
-                                                    href="/dashboard/reports",
-                                                ),
-                                            ]
-                                        ),
-                                    ],
-                                    className="mb-4",
-                                ),
-                            ],
-                            width=6,
-                        ),
-                    ]
-                ),
-            ],
-            className="mt-4",
-        ),
-    ]
+        dcc.Location(id="url", refresh=False),
+        html.Div(id="page-content"),
+        dcc.Store(id="theme-store", storage_type="local"),
+    ],
+    id="_body",
 )
 
 
-# Callback to update the page content based on URL
 @app.callback(Output("page-content", "children"), Input("url", "pathname"))
 def display_page(pathname):
-    if pathname == "/dashboard/" or pathname == "/dashboard":
-        return home_layout
+    if pathname == "/dashboard/" or pathname == "/dashboard" or pathname == "/":
+        from views.visual_dashboard import layout
+
+        return layout
     elif pathname == "/dashboard/data-collection":
-        # This will be imported from data_collection.py
         from views.data_collection import layout
 
         return layout
     elif pathname == "/dashboard/database":
-        # This will be imported from database_management.py
         from views.database_management import layout
 
         return layout
-    elif pathname == "/dashboard/reports":
-        # This will be imported from reports.py
-        from views.reports import layout
-
-        return layout
-    elif pathname == "/dashboard/dashboard":
-        # This will be imported from visual_dashboard.py
+    else:
         from views.visual_dashboard import layout
 
         return layout
-    else:
-        return home_layout
 
 
-# Flask routes for non-Dash pages
 @server.route("/")
 def index():
     return redirect("/dashboard/")
@@ -259,7 +103,6 @@ def index():
 @server.route("/initialize-database/<reset_schedules>")
 def initialize_db(reset_schedules=None):
     try:
-        # Если передан параметр reset_schedules=true, то пересоздаем расписания
         force_reset = reset_schedules == "true"
         init_database(force_reset_schedules=force_reset)
         return "Database initialized successfully!" + (
@@ -278,7 +121,6 @@ def initialize_schedules(force_reset=None):
         Session = sessionmaker(bind=engine)
         session = Session()
 
-        # Если передан параметр force_reset=true, то пересоздаем расписания
         do_reset = force_reset == "true"
         init_schedules(session, force_reset=do_reset)
 
@@ -291,25 +133,59 @@ def initialize_schedules(force_reset=None):
         return f"Error initializing schedules: {str(e)}"
 
 
-# Import views and register callbacks after the app is defined
 from views import register_callbacks
 
-# Register all callbacks
+
+# Создание callback для темы
+@app.callback(
+    [
+        Output("theme-store", "data", allow_duplicate=True),
+        Output("_body", "className"),
+        Output("_body", "data-theme"),
+    ],
+    [Input("theme-switch", "value")],
+    prevent_initial_call="initial_duplicate",
+)
+def update_global_theme(dark_mode):
+    if dark_mode is None:
+        dark_mode = True
+
+    theme_data = {"dark_mode": dark_mode}
+    body_class = "dark-mode-active" if dark_mode else ""
+
+    return theme_data, body_class, ""
+
+
 register_callbacks(app)
 
-if __name__ == "__main__":
-    # Create logs directory if it doesn't exist
-    if not os.path.exists("logs"):
-        os.makedirs("logs")
+app.clientside_callback(
+    """
+    function(data) {
+        if (data && data.dark_mode) {
+            document.documentElement.classList.add('dark-mode-active');
+            document.body.classList.add('dark-mode-active');
+            document.body.classList.remove('light-mode-active');
+        } else {
+            document.documentElement.classList.remove('dark-mode-active');
+            document.body.classList.remove('dark-mode-active');
+            document.body.classList.add('light-mode-active');
+        }
+        return window.dash_clientside.no_update;
+    }
+    """,
+    Output("_body", "data-theme", allow_duplicate=True),
+    Input("theme-store", "data"),
+    prevent_initial_call=True,
+)
 
-    # Start the scheduler thread if enabled
+if __name__ == "__main__":
+
     if APP_CONFIG.get("enable_scheduler", True):
         scheduler = threading.Thread(target=scheduler_thread)
-        scheduler.daemon = True  # Thread will exit when main thread exits
+        scheduler.daemon = True
         scheduler.start()
         logger.info("Started background scheduler thread")
 
-    # Start the application
     server.run(
         host=APP_CONFIG.get("host", "0.0.0.0"),
         port=APP_CONFIG.get("port", 5001),

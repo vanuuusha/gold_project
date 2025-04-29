@@ -1,33 +1,116 @@
 from dash import html, dcc, dash_table, dash, callback_context
 from dash.dependencies import Input, Output, State, ALL
 import dash_bootstrap_components as dbc
+import dash_ag_grid as dag
 import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from sqlalchemy import create_engine, and_, func
+from sqlalchemy import create_engine, and_, func, inspect
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime, timedelta, date
 from loguru import logger
 import json
+from io import StringIO
 
-from database.init_database import MetalType, DataSource, MetalPrice
+from database.init_database import (
+    Base,
+    MetalType,
+    DataSource,
+    MetalPrice,
+    CollectorSchedule,
+)
 from settings import DB_URL
+from views.components import create_theme_switch
 
-# Create SQLAlchemy engine and session
 engine = create_engine(DB_URL)
 Session = sessionmaker(bind=engine)
 
 
-# Function to calculate technical indicators
+def get_available_data_sources():
+    """
+    Запрос в базу данных для получения всех уникальных источников данных
+    """
+    try:
+        session = Session()
+
+        data_sources = session.query(MetalPrice.source).distinct().all()
+
+        options = []
+        for ds in data_sources:
+            data_source = ds[0]
+            if isinstance(data_source, DataSource):
+                options.append({"label": data_source.value, "value": data_source.name})
+
+        if not options:
+            logger.warning(
+                f"No data sources found in database, using all sources as fallback"
+            )
+            options = [
+                {"label": data_source.value, "value": data_source.name}
+                for data_source in DataSource
+            ]
+
+        return options, None
+
+    except Exception as e:
+        logger.error(f"Error getting available data sources: {e}")
+        return [
+            {"label": data_source.value, "value": data_source.name}
+            for data_source in DataSource
+        ], f"Error: {str(e)}"
+
+    finally:
+        session.close()
+
+
+def initialize_dropdown_options():
+    """
+    Инициализация опций выпадающих списков для металлов и источников данных
+    """
+    data_source_options, _ = get_available_data_sources()
+
+    default_source = DataSource.YFINANCE.name
+    if data_source_options:
+        default_source = data_source_options[0]["value"]
+
+    metal_options, _ = get_available_metals_for_source(default_source)
+
+    return metal_options, data_source_options, default_source
+
+
+try:
+    initial_metal_options, initial_source_options, default_source = (
+        [
+            {"label": metal_type.value, "value": metal_type.name}
+            for metal_type in MetalType
+        ],
+        [
+            {"label": data_source.value, "value": data_source.name}
+            for data_source in DataSource
+        ],
+        DataSource.YFINANCE.name,
+    )
+    logger.info("Using default dropdown options")
+except Exception as e:
+    logger.error(f"Error initializing dropdown options: {e}")
+    initial_metal_options = [
+        {"label": metal_type.value, "value": metal_type.name}
+        for metal_type in MetalType
+    ]
+    initial_source_options = [
+        {"label": data_source.value, "value": data_source.name}
+        for data_source in DataSource
+    ]
+    default_source = DataSource.YFINANCE.name
+
+
 def calculate_indicators(df, metal_type=None, custom_params=None):
-    """Calculate various technical indicators for the data"""
-    # Create a copy to avoid modifying the original
+    """Расчет различных технических индикаторов для данных"""
     result_df = df.copy()
 
     if metal_type:
-        # Filter for specific metal type
         mask = result_df["metal_type"] == metal_type
         temp_df = result_df[mask].copy()
     else:
@@ -36,27 +119,22 @@ def calculate_indicators(df, metal_type=None, custom_params=None):
     if temp_df.empty:
         return result_df
 
-    # Sort by timestamp
     temp_df = temp_df.sort_values("timestamp")
 
-    # Get custom parameters
     if custom_params is None:
         custom_params = {}
 
-    # Get custom moving averages
     custom_mas = custom_params.get("moving_avgs", [])
     bb_period = custom_params.get("bb_period", 20)
     bb_stddev = custom_params.get("bb_stddev", 2)
     rsi_period = custom_params.get("rsi_period", 14)
 
-    # Simple Moving Averages (SMA)
     for ma_entry in custom_mas:
         if ma_entry["type"] == "sma":
             window = ma_entry["period"]
             col_name = f"sma_{window}"
             temp_df[col_name] = temp_df["close_price"].rolling(window=window).mean()
 
-    # Exponential Moving Averages (EMA)
     for ma_entry in custom_mas:
         if ma_entry["type"] == "ema":
             window = ma_entry["period"]
@@ -65,44 +143,32 @@ def calculate_indicators(df, metal_type=None, custom_params=None):
                 temp_df["close_price"].ewm(span=window, adjust=False).mean()
             )
 
-    # Bollinger Bands
     bb_col = f"sma_{bb_period}"
-    # Add the SMA if it doesn't exist yet
+    # Добавление  SMA if it doesn't exist yet
     if bb_col not in temp_df.columns:
         temp_df[bb_col] = temp_df["close_price"].rolling(window=bb_period).mean()
 
-    # Use the SMA as middle band
+    # Use  SMA as средняя полоса
     temp_df["bb_middle"] = temp_df[bb_col]
-    # Standard deviation of the price
     temp_df["bb_stddev"] = temp_df["close_price"].rolling(window=bb_period).std()
-    # Upper and lower bands (using specified standard deviations)
     temp_df["bb_upper"] = temp_df["bb_middle"] + bb_stddev * temp_df["bb_stddev"]
     temp_df["bb_lower"] = temp_df["bb_middle"] - bb_stddev * temp_df["bb_stddev"]
 
-    # Relative Strength Index (RSI)
-    # Calculate price changes
     temp_df["price_change"] = temp_df["close_price"].diff()
 
-    # Calculate gains and losses
     temp_df["gain"] = np.where(temp_df["price_change"] > 0, temp_df["price_change"], 0)
     temp_df["loss"] = np.where(temp_df["price_change"] < 0, -temp_df["price_change"], 0)
 
-    # Calculate average gains and losses over specified period
     temp_df["avg_gain"] = temp_df["gain"].rolling(window=rsi_period).mean()
     temp_df["avg_loss"] = temp_df["loss"].rolling(window=rsi_period).mean()
 
-    # Calculate relative strength (RS)
     temp_df["rs"] = temp_df["avg_gain"] / temp_df["avg_loss"]
 
-    # Calculate RSI
     temp_df["rsi"] = 100 - (100 / (1 + temp_df["rs"]))
 
-    # Ensure RSI is within bounds (0-100)
     temp_df["rsi"] = np.clip(temp_df["rsi"], 0, 100)
 
-    # If we're working with a subset, update the original dataframe
     if metal_type:
-        # Update the original dataframe with the calculated indicators
         for col in temp_df.columns:
             if col not in result_df.columns:
                 result_df.loc[mask, col] = temp_df[col].values
@@ -117,23 +183,11 @@ def calculate_indicators(df, metal_type=None, custom_params=None):
 # Define layout
 layout = html.Div(
     [
-        # Store for user preferences
+        dcc.Store(id="theme-store", storage_type="local"),
         dcc.Store(id="user-preferences", storage_type="local"),
-        # Store to track if metals were fetched for a source
-        dcc.Store(id="metals-fetched-store", storage_type="session", data={}),
-        # Theme toggle - will be positioned in the navbar
-        html.Div(
-            [
-                dbc.Switch(
-                    id="theme-switch",
-                    label="Dark Mode",
-                    value=True,
-                    className="ms-auto",
-                ),
-            ],
-            className="ms-auto d-flex align-items-center no-print",
-            style={"marginRight": "20px"},
-        ),
+        dcc.Store(id="metals-fetched-store", storage_type="session"),
+        dcc.Store(id="custom-indicators-store", storage_type="session"),
+        dcc.Store(id="chart-data-store"),
         dbc.NavbarSimple(
             children=[
                 dbc.NavItem(dbc.NavLink("Dashboard", href="/dashboard/", active=True)),
@@ -143,9 +197,15 @@ layout = html.Div(
                 dbc.NavItem(
                     dbc.NavLink("Database Management", href="/dashboard/database")
                 ),
-                dbc.NavItem(dbc.NavLink("Reports", href="/dashboard/reports")),
-                # Theme switch will be inserted here via a callback
-                html.Div(id="theme-switch-container"),
+                dbc.NavItem(
+                    dbc.Switch(
+                        id="theme-switch",
+                        label="Dark Mode",
+                        value=True,
+                        className="ms-auto mt-2 mb-2",
+                    ),
+                    className="ms-auto d-flex align-items-center",
+                ),
             ],
             brand="Precious Metals Analytics",
             brand_href="/dashboard/",
@@ -159,44 +219,36 @@ layout = html.Div(
                 html.H1("Dashboard", className="my-4"),
                 html.P("Interactive visualization dashboard for metal price analysis."),
                 html.Hr(),
-                # Dashboard Controls
+                # панели Controls
                 dbc.Row(
                     [
-                        # Metal Selection
                         dbc.Col(
                             [
                                 html.Label("Select Metals"),
                                 dcc.Dropdown(
                                     id="metals-dropdown",
-                                    options=[
-                                        {
-                                            "label": metal_type.value,
-                                            "value": metal_type.name,
-                                        }
-                                        for metal_type in MetalType
-                                    ],
-                                    value=[MetalType.GOLD.name],
+                                    options=initial_metal_options,
+                                    value=(
+                                        [initial_metal_options[0]["value"]]
+                                        if initial_metal_options
+                                        else []
+                                    ),
                                     multi=True,
                                 ),
                             ],
                             width=4,
                         ),
-                        # Source Selection
                         dbc.Col(
                             [
                                 html.Label("Select Data Source"),
                                 dcc.Dropdown(
                                     id="source-dropdown",
-                                    options=[
-                                        {"label": source.value, "value": source.name}
-                                        for source in DataSource
-                                    ],
-                                    value=DataSource.YFINANCE.name,
+                                    options=initial_source_options,
+                                    value=default_source,
                                 ),
                             ],
                             width=4,
                         ),
-                        # Timeframe Selection
                         dbc.Col(
                             [
                                 html.Label("Timeframe"),
@@ -215,10 +267,8 @@ layout = html.Div(
                     ],
                     className="mb-3",
                 ),
-                # Time Period Selection
                 dbc.Row(
                     [
-                        # Time Period Selection
                         dbc.Col(
                             [
                                 html.Label("Time Period"),
@@ -237,7 +287,6 @@ layout = html.Div(
                             ],
                             width=6,
                         ),
-                        # Chart Type Selection
                         dbc.Col(
                             [
                                 html.Label("Chart Type"),
@@ -274,7 +323,6 @@ layout = html.Div(
                     ],
                     className="mb-3",
                 ),
-                # Custom Date Range (initially hidden)
                 dbc.Row(
                     [
                         dbc.Col(
@@ -302,7 +350,6 @@ layout = html.Div(
                     ],
                     className="mb-3",
                 ),
-                # Technical Indicators Controls (shown by default now)
                 dbc.Row(
                     [
                         dbc.Col(
@@ -311,7 +358,6 @@ layout = html.Div(
                                     id="technical-indicators-container",
                                     children=[
                                         html.H5("Technical Indicators"),
-                                        # Price Series Controls
                                         dbc.Card(
                                             [
                                                 dbc.CardHeader("Price Series"),
@@ -345,7 +391,7 @@ layout = html.Div(
                                             ],
                                             className="mb-2",
                                         ),
-                                        # Moving Averages
+                                        # скользящих средних
                                         dbc.Card(
                                             [
                                                 dbc.CardHeader("Moving Averages"),
@@ -443,7 +489,7 @@ layout = html.Div(
                                             ],
                                             className="mb-2",
                                         ),
-                                        # Bollinger Bands
+                                        # Полосы Боллинджера
                                         dbc.Card(
                                             [
                                                 dbc.CardHeader("Bollinger Bands"),
@@ -512,7 +558,6 @@ layout = html.Div(
                                             ],
                                             className="mb-2",
                                         ),
-                                        # Other indicators
                                         dbc.Card(
                                             [
                                                 dbc.CardHeader("Other Indicators"),
@@ -567,7 +612,7 @@ layout = html.Div(
                     ],
                     className="mb-3",
                 ),
-                # Main Chart
+                # Main графика
                 dbc.Row(
                     [
                         dbc.Col(
@@ -606,12 +651,9 @@ layout = html.Div(
                     ],
                     className="mb-4",
                 ),
-                # Spacer for RSI - will be dynamically sized
                 html.Div(id="rsi-spacer", style={"height": "0px"}),
-                # Additional Charts Row
                 dbc.Row(
                     [
-                        # Price Statistics
                         dbc.Col(
                             [
                                 dbc.Card(
@@ -633,7 +675,6 @@ layout = html.Div(
                             ],
                             width=6,
                         ),
-                        # Volatility Analysis
                         dbc.Col(
                             [
                                 dbc.Card(
@@ -664,7 +705,6 @@ layout = html.Div(
                     ],
                     className="mb-4",
                 ),
-                # Data Table Section
                 dbc.Row(
                     [
                         dbc.Col(
@@ -681,7 +721,6 @@ layout = html.Div(
                                                         html.Div(id="price-data-table"),
                                                     ],
                                                 ),
-                                                # Add download component here instead
                                             ]
                                         ),
                                     ]
@@ -692,30 +731,26 @@ layout = html.Div(
                     ],
                     className="mb-4",
                 ),
-                # Hidden components
-                dcc.Store(id="chart-data-store"),
-                dcc.Store(id="custom-indicators-store"),
             ],
-            className="mt-4",
-            id="main-container",
+            id="dashboard-container",
+            className="ag-theme-quartz-dark",
+            fluid=True,
         ),
     ],
-    id="dashboard-container",
+    id="main-layout",
+    className="main-container",
 )
 
 
-# Helper function to get price data
 def get_price_data(metals, source, start_date, end_date, timeframe="1D"):
     try:
         session = Session()
 
-        # Convert metals to MetalType enums if they're strings
         if isinstance(metals, list) and all(isinstance(m, str) for m in metals):
             metals = [MetalType[m] for m in metals]
         elif isinstance(metals, str):
             metals = [MetalType[metals]]
 
-        # Convert source to DataSource enum if it's a string
         if isinstance(source, str):
             source = DataSource[source]
 
@@ -740,17 +775,14 @@ def get_price_data(metals, source, start_date, end_date, timeframe="1D"):
             .order_by(MetalPrice.metal_type, MetalPrice.timestamp)
         )
 
-        # Execute query
         results = query.all()
 
-        # Convert to DataFrame
         data = []
         for result in results:
             metal_type, timestamp, open_price, high_price, low_price, close_price = (
                 result
             )
 
-            # Skip records with missing prices
             if close_price is None:
                 continue
 
@@ -767,13 +799,10 @@ def get_price_data(metals, source, start_date, end_date, timeframe="1D"):
 
         df = pd.DataFrame(data)
 
-        # Handle empty results
         if df.empty:
             return None, "No data found for the selected criteria"
 
-        # Apply timeframe resampling if needed
         if timeframe != "1D" and not df.empty:
-            # Define resample rule based on timeframe
             resample_map = {
                 "1H": "1H",
                 "4H": "4H",
@@ -781,18 +810,15 @@ def get_price_data(metals, source, start_date, end_date, timeframe="1D"):
             }
             rule = resample_map.get(timeframe, "1D")
 
-            # Process each metal type separately
             all_resampled = []
 
             for metal in df["metal_type"].unique():
-                # Get data for this metal
                 metal_df = df[df["metal_type"] == metal].copy()
 
-                # Set timestamp as index for resampling
                 metal_df.set_index("timestamp", inplace=True)
 
                 try:
-                    # Resample the data
+                    # Resample  данных
                     resampled = metal_df.resample(rule).agg(
                         {
                             "open_price": "first",
@@ -802,34 +828,26 @@ def get_price_data(metals, source, start_date, end_date, timeframe="1D"):
                         }
                     )
 
-                    # Fill any missing values that might occur during resampling
                     resampled.fillna(method="ffill", inplace=True)
 
-                    # Add back the metal_type
                     resampled["metal_type"] = metal
 
-                    # Reset the index to get timestamp as a column
                     resampled.reset_index(inplace=True)
 
                     all_resampled.append(resampled)
                 except Exception as e:
                     logger.error(f"Error resampling data for {metal}: {e}")
 
-            # Combine all the resampled dataframes
             if all_resampled:
                 df = pd.concat(all_resampled, ignore_index=True)
         elif timeframe == "1D":  # Ensure daily data is handled properly
-            # Process each metal type separately
             all_daily = []
 
             for metal in df["metal_type"].unique():
-                # Get data for this metal
                 metal_df = df[df["metal_type"] == metal].copy()
 
-                # Convert timestamp to date for grouping
                 metal_df["date"] = metal_df["timestamp"].dt.date
 
-                # Group by date to get daily OHLC values
                 daily = metal_df.groupby("date").agg(
                     {
                         "open_price": "first",
@@ -840,14 +858,12 @@ def get_price_data(metals, source, start_date, end_date, timeframe="1D"):
                     }
                 )
 
-                # Reset index and convert date back to datetime
                 daily.reset_index(inplace=True)
                 daily["timestamp"] = pd.to_datetime(daily["date"])
                 daily.drop("date", axis=1, inplace=True)
 
                 all_daily.append(daily)
 
-            # Combine all daily dataframes
             if all_daily:
                 df = pd.concat(all_daily, ignore_index=True)
 
@@ -862,7 +878,6 @@ def get_price_data(metals, source, start_date, end_date, timeframe="1D"):
         session.close()
 
 
-# Function to get available metal types for a specific data source
 def get_available_metals_for_source(source):
     """
     Query the database to get all metal types available for a specific data source
@@ -877,31 +892,17 @@ def get_available_metals_for_source(source):
     try:
         session = Session()
 
-        # Convert source to DataSource enum if it's a string
-        if isinstance(source, str):
-            source = DataSource[source]
+        # Query distinct metal types из  базы данных without filtering by источника
+        metal_types = session.query(MetalPrice.metal_type).distinct().all()
 
-        # Query distinct metal types for this source
-        query = (
-            session.query(MetalPrice.metal_type)
-            .filter(MetalPrice.source == source)
-            .distinct()
-        )
-
-        # Execute query
-        results = query.all()
-
-        # Convert to options format for dropdown
         options = []
-        for result in results:
-            metal_type = result[0]  # Get the metal type from the result tuple
-            options.append({"label": metal_type.value, "value": metal_type.name})
+        for mt in metal_types:
+            metal_type = mt[0]
+            if isinstance(metal_type, MetalType):
+                options.append({"label": metal_type.value, "value": metal_type.name})
 
-        # If no results, return all metal types as fallback
         if not options:
-            logger.warning(
-                f"No metals found for source {source}, using all metals as fallback"
-            )
+            logger.warning(f"No metals found in database, using all metals as fallback")
             options = [
                 {"label": metal_type.value, "value": metal_type.name}
                 for metal_type in MetalType
@@ -920,9 +921,16 @@ def get_available_metals_for_source(source):
         session.close()
 
 
-# Register callbacks
 def register_callbacks(app):
-    # Show/hide custom date range based on time period selection
+    @app.callback(
+        Output("source-dropdown", "options"),
+        Input("dashboard-container", "children"),
+        prevent_initial_call=False,
+    )
+    def initialize_data_source_options(_):
+        data_source_options, _ = get_available_data_sources()
+        return data_source_options
+
     @app.callback(
         Output("dashboard-custom-date-range-container", "style"),
         [Input("time-period-dropdown", "value")],
@@ -932,83 +940,36 @@ def register_callbacks(app):
             return {"display": "block"}
         return {"display": "none"}
 
-    # Update metals dropdown based on selected data source
     @app.callback(
         [Output("metals-dropdown", "options"), Output("metals-fetched-store", "data")],
         [Input("source-dropdown", "value")],
         [State("metals-fetched-store", "data")],
     )
     def update_metals_dropdown(source, fetched_sources):
-        # Handle case when fetched_sources is None
         if fetched_sources is None:
             fetched_sources = {}
 
-        # Determine which input triggered the callback
-        ctx = callback_context
-        if not ctx.triggered:
-            # Initial load
-            triggered = "initial"
-        else:
-            triggered = ctx.triggered[0]["prop_id"].split(".")[0]
+        trigger = callback_context.triggered[0]["prop_id"].split(".")[0]
 
-        if not source:
-            # Default to all metals if no source selected
-            return [
-                {"label": metal_type.value, "value": metal_type.name}
-                for metal_type in MetalType
-            ], fetched_sources
+        if trigger == "source-dropdown" or not fetched_sources:
+            metal_options, error = get_available_metals_for_source(source)
 
-        # Check if we've already fetched metals for this source
-        if source in fetched_sources:
-            # Return the cached options
-            return fetched_sources[source]["options"], fetched_sources
+            if source:
+                fetched_sources[source] = [option["value"] for option in metal_options]
 
-        # Get available metals for this source
-        options, error = get_available_metals_for_source(source)
-        if error:
-            logger.error(f"Error updating metals dropdown: {error}")
+            return metal_options, fetched_sources
 
-        # Update the fetched_sources dictionary
-        fetched_sources[source] = {"options": options}
+        return dash.no_update, fetched_sources
 
-        return options, fetched_sources
-
-    # Update metals dropdown value when source changes to ensure compatibility
     @app.callback(
         Output("metals-dropdown", "value", allow_duplicate=True),
         [Input("source-dropdown", "value")],
         [State("metals-dropdown", "value"), State("metals-fetched-store", "data")],
-        # Don't run this callback when loading preferences
         prevent_initial_call=True,
     )
     def update_metals_selection(source, current_selection, fetched_sources):
-        # Handle case when fetched_sources is None
-        if fetched_sources is None:
-            fetched_sources = {}
-
-        if not source:
-            return current_selection
-
-        # Check if we have info for this source
-        if source not in fetched_sources:
-            return current_selection
-
-        # Get available options for this source
-        available_options = fetched_sources[source]["options"]
-        available_values = [option["value"] for option in available_options]
-
-        # Filter current selection to only include available metals
-        if current_selection:
-            filtered_selection = [
-                metal for metal in current_selection if metal in available_values
-            ]
-            # Allow empty selection - don't automatically add a metal
-            return filtered_selection
-
-        # Keep empty selection if that's what user has chosen
         return current_selection
 
-    # Show/hide technical indicators based on chart type
     @app.callback(
         Output("technical-indicators-container", "style"),
         [Input("chart-type-dropdown", "value")],
@@ -1018,7 +979,6 @@ def register_callbacks(app):
             return {"display": "block"}
         return {"display": "none"}
 
-    # Update end date of custom range when time period changes
     @app.callback(
         [
             Output("dashboard-custom-date-range", "start_date"),
@@ -1042,31 +1002,38 @@ def register_callbacks(app):
         elif time_period == "365D":
             start_date = (datetime.now() - timedelta(days=365)).date()
         else:
-            # For custom, keep the current values (will be overridden by user)
+            # для custom, keep  current значений (will be overridden by user)
             return dash.no_update, dash.no_update
 
         return start_date, end_date
 
-    # Theme switch callback
     @app.callback(
         [
             Output("dashboard-container", "className"),
             Output("navbar", "dark"),
             Output("navbar", "color"),
         ],
-        [Input("theme-switch", "value")],
+        [Input("theme-store", "data")],
+        prevent_initial_call=False,
     )
-    def update_theme(dark_mode):
-        # Default to dark mode if value is None
-        if dark_mode is None:
-            dark_mode = True
+    def update_dashboard_theme(theme_data):
+        # Получение dark mode из Тема Хранилище
+        dark_mode = theme_data.get("dark_mode", True) if theme_data else True
 
         if dark_mode:
-            return "dbc dbc-dark", True, "primary"
+            return (
+                "ag-theme-quartz-dark",
+                True,
+                "dark",
+            )
         else:
-            return "dbc", False, "light"
+            return (
+                "ag-theme-quartz",
+                False,
+                "light",
+            )
 
-    # Load user preferences from local storage
+    # Загрузка user preferences из local storage
     @app.callback(
         [
             Output("metals-dropdown", "value"),
@@ -1093,10 +1060,11 @@ def register_callbacks(app):
             State("bb-checklist", "value"),
             State("other-indicators-checklist", "value"),
             State("metals-fetched-store", "data"),
+            State("theme-store", "data"),
         ],
         prevent_initial_call="initial_duplicate",
     )
-    def load_preferences(
+    def load_dashboard_preferences(
         stored_prefs,
         metals,
         source,
@@ -1109,76 +1077,40 @@ def register_callbacks(app):
         bb,
         other_indicators,
         fetched_sources,
+        theme_data,
     ):
-        # Handle case when fetched_sources is None
         if fetched_sources is None:
             fetched_sources = {}
 
-        # Default values if no stored preferences
+        theme_from_store = theme_data.get("dark_mode", True) if theme_data else True
+
         if not stored_prefs:
             return (
-                metals or [],  # Return empty list instead of [MetalType.GOLD.name]
-                source or DataSource.YFINANCE.name,
+                metals
+                or [MetalType.GOLD.name],  # Default to GOLD if no metals selected
+                source or default_source,
                 timeframe or "1D",
                 time_period or "30D",
                 chart_type or "advanced",
-                theme_switch,
+                theme_from_store,  # Use theme from store
                 price_series or ["close"],
                 moving_avgs or [],
                 bb or [],
                 other_indicators or [],
             )
 
-        # Return stored values or defaults if keys don't exist
         try:
-            # Get the stored or default source
-            preferred_source = stored_prefs.get(
-                "source", source or DataSource.YFINANCE.name
-            )
+            preferred_source = stored_prefs.get("source", source or default_source)
 
-            # Get available metals for this source
-            # Use fetched_sources if available for this source, otherwise query
-            available_metal_values = []
-            if preferred_source in fetched_sources:
-                available_options = fetched_sources[preferred_source]["options"]
-                available_metal_values = [
-                    option["value"] for option in available_options
-                ]
-            else:
-                # Fallback to querying the database if not cached yet
-                available_metals, _ = get_available_metals_for_source(preferred_source)
-                available_metal_values = [
-                    option["value"] for option in available_metals
-                ]
-                # We don't update fetched_sources here because another callback will handle that
-
-            # Get stored metals and filter to only include available ones
             stored_metals = stored_prefs.get("metals", metals or [])
 
-            # If user has already selected metals and we're not changing the source,
-            # keep the user's selection instead of filtering
-            current_source = source or DataSource.YFINANCE.name
-            if current_source == preferred_source and metals is not None:
-                filtered_metals = metals
-            else:
-                # Filter to only include available metals for the selected source
-                if isinstance(stored_metals, list):
-                    filtered_metals = [
-                        m for m in stored_metals if m in available_metal_values
-                    ]
-                    # Don't add a default metal when filtering results in empty list
-                    # This allows empty selection
-                else:
-                    # Handle case when stored_metals is not a list
-                    filtered_metals = []
-
             return (
-                filtered_metals,
+                stored_metals,
                 preferred_source,
                 stored_prefs.get("timeframe", timeframe or "1D"),
                 stored_prefs.get("time_period", time_period or "30D"),
                 stored_prefs.get("chart_type", chart_type or "advanced"),
-                stored_prefs.get("theme_switch", theme_switch),
+                theme_from_store,  # Use theme from store instead of preferences
                 stored_prefs.get("price_series", price_series or ["close"]),
                 stored_prefs.get("moving_avgs", moving_avgs or []),
                 stored_prefs.get("bb", bb or []),
@@ -1199,7 +1131,6 @@ def register_callbacks(app):
                 dash.no_update,
             )
 
-    # Save user preferences to local storage
     @app.callback(
         Output("user-preferences", "data", allow_duplicate=True),
         [
@@ -1208,7 +1139,6 @@ def register_callbacks(app):
             Input("timeframe-dropdown", "value"),
             Input("time-period-dropdown", "value"),
             Input("chart-type-dropdown", "value"),
-            Input("theme-switch", "value"),
             Input("price-series-checklist", "value"),
             Input("moving-avg-checklist", "value"),
             Input("bb-checklist", "value"),
@@ -1219,45 +1149,56 @@ def register_callbacks(app):
         ],
         prevent_initial_call="initial_duplicate",
     )
-    def save_preferences(
+    def save_dashboard_preferences(
         metals,
         source,
         timeframe,
         time_period,
         chart_type,
-        theme_switch,
         price_series,
         moving_avgs,
         bb,
         other_indicators,
         current_prefs,
     ):
-        # Determine which input triggered the callback
         ctx = callback_context
+
         if not ctx.triggered:
-            # Initial load, don't update
-            return current_prefs or {}
+            return dash.no_update
 
-        # Create or update preferences
-        prefs = current_prefs or {}
-        prefs.update(
-            {
-                "metals": metals,
-                "source": source,
-                "timeframe": timeframe,
-                "time_period": time_period,
-                "chart_type": chart_type,
-                "theme_switch": theme_switch,
-                "price_series": price_series,
-                "moving_avgs": moving_avgs,
-                "bb": bb,
-                "other_indicators": other_indicators,
-            }
-        )
+        triggered_input = ctx.triggered[0]["prop_id"].split(".")[0]
 
-        return prefs
+        # Инициализация preferences if they don't exist
+        if current_prefs is None:
+            current_prefs = {}
 
-    # Manage custom moving averages - Add SMA
+        # Обновление individual field only if changed
+        if triggered_input == "metals-dropdown":
+            current_prefs["metals"] = metals
+        elif triggered_input == "source-dropdown":
+            current_prefs["source"] = source
+        elif triggered_input == "timeframe-dropdown":
+            current_prefs["timeframe"] = timeframe
+        elif triggered_input == "time-period-dropdown":
+            current_prefs["time_period"] = time_period
+        elif triggered_input == "chart-type-dropdown":
+            current_prefs["chart_type"] = chart_type
+        elif triggered_input == "price-series-checklist":
+            current_prefs["price_series"] = price_series
+        elif triggered_input == "moving-avg-checklist":
+            current_prefs["moving_avgs"] = moving_avgs
+        elif triggered_input == "bb-checklist":
+            current_prefs["bb"] = bb
+        elif triggered_input == "other-indicators-checklist":
+            current_prefs["other_indicators"] = other_indicators
+        else:
+            logger.warning(
+                f"Unknown input triggered save_preferences: {triggered_input}"
+            )
+            return dash.no_update
+
+        return current_prefs
+
     @app.callback(
         [
             Output("moving-avg-checklist", "options", allow_duplicate=True),
@@ -1288,71 +1229,58 @@ def register_callbacks(app):
     ):
         ctx = callback_context
         if not ctx.triggered:
-            # Initial load - don't update
             return dash.no_update, dash.no_update, dash.no_update
 
-        # Initialize data if needed
+        # Инициализация данных if needed
         if custom_indicators is None:
             custom_indicators = {"moving_avgs": []}
 
-        # Get the current moving averages list
         if "moving_avgs" not in custom_indicators:
             custom_indicators["moving_avgs"] = []
 
-        # Determine which button was clicked
         button_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
-        # Start with current options
         if not current_options:
             current_options = []
 
-        # Add the new moving average based on the button clicked
         if button_id == "add-sma-button" and sma_period:
-            # Check if SMA already exists
+            # Проверка if SMA already exists
             sma_value = f"sma_{sma_period}"
             sma_exists = any(opt["value"] == sma_value for opt in current_options)
 
             if not sma_exists and sma_period >= 2:
-                # Add new SMA
                 custom_indicators["moving_avgs"].append(
                     {"type": "sma", "period": sma_period}
                 )
-                # Add to options
+                # Добавление к опций
                 current_options.append(
                     {"label": f"SMA-{sma_period}", "value": sma_value}
                 )
-                # Add to selected values
                 if current_ma_values is None:
                     current_ma_values = []
                 current_ma_values.append(sma_value)
 
         elif button_id == "add-ema-button" and ema_period:
-            # Check if EMA already exists
             ema_value = f"ema_{ema_period}"
             ema_exists = any(opt["value"] == ema_value for opt in current_options)
 
             if not ema_exists and ema_period >= 2:
-                # Add new EMA
                 custom_indicators["moving_avgs"].append(
                     {"type": "ema", "period": ema_period}
                 )
-                # Add to options
                 current_options.append(
                     {"label": f"EMA-{ema_period}", "value": ema_value}
                 )
-                # Add to selected values
                 if current_ma_values is None:
                     current_ma_values = []
                 current_ma_values.append(ema_value)
 
-        # Sort options by type and period
         current_options.sort(
             key=lambda x: (x["value"].split("_")[0], int(x["value"].split("_")[1]))
         )
 
         return current_options, current_ma_values, custom_indicators
 
-    # Store custom indicator parameters
     @app.callback(
         Output("custom-indicators-store", "data", allow_duplicate=True),
         [
@@ -1365,13 +1293,13 @@ def register_callbacks(app):
         ],
         prevent_initial_call=True,
     )
-    def update_custom_indicators(
+    def update_dashboard_custom_indicators(
         bb_period,
         bb_stddev,
         rsi_period,
         custom_indicators,
     ):
-        # Initialize data if needed - preserve existing moving averages
+        # Инициализация данных if needed - preserve existing скользящих средних
         if custom_indicators is None:
             custom_indicators = {
                 "moving_avgs": [],
@@ -1382,15 +1310,13 @@ def register_callbacks(app):
         elif "moving_avgs" not in custom_indicators:
             custom_indicators["moving_avgs"] = []
 
-        # Context to determine which input triggered the callback
+        # Context к determine which input triggered  Колбэк
         ctx = callback_context
         if not ctx.triggered:
             return dash.no_update
 
-        # Get the changed parameter
         input_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
-        # Update only the changed parameter
         if input_id == "bb-period-input" and bb_period is not None:
             custom_indicators["bb_period"] = bb_period
         elif input_id == "bb-stddev-input" and bb_stddev is not None:
@@ -1400,7 +1326,6 @@ def register_callbacks(app):
 
         return custom_indicators
 
-    # Main callback to update all charts
     @app.callback(
         [
             Output("chart-data-store", "data"),
@@ -1440,17 +1365,14 @@ def register_callbacks(app):
         custom_indicators,
     ):
         try:
-            # Determine which input triggered the callback
             ctx = callback_context
             if not ctx.triggered:
-                # No trigger, initial load
                 trigger_id = None
             else:
                 trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
             logger.info(f"Dashboard update triggered by: {trigger_id}")
 
-            # Handle empty metals list - show empty charts instead of error
             if not metals:
                 message = "Не выбраны металлы"
                 empty_fig = {
@@ -1496,11 +1418,9 @@ def register_callbacks(app):
                 )
                 return None, empty_fig, empty_fig, empty_stats, empty_table
 
-            # Ensure timeframe has a valid value
             if not timeframe or timeframe not in ["1H", "4H", "1D"]:
                 timeframe = "1D"  # Default to daily timeframe
 
-            # Calculate date range based on time period
             end_date = datetime.now()
 
             if time_period == "custom":
@@ -1536,18 +1456,16 @@ def register_callbacks(app):
                 days = days_map.get(time_period, 30)
                 start_date = end_date - timedelta(days=days)
 
-            # Log all parameters for debugging
             logger.info(
                 f"Getting data with params: metals={metals}, source={source}, start_date={start_date}, end_date={end_date}, timeframe={timeframe}"
             )
 
-            # Get data
+            # Получение данных
             df, error = get_price_data(
                 metals, source, start_date, end_date, timeframe=timeframe
             )
 
             if error:
-                # Return empty figures with error message
                 empty_fig = {
                     "data": [],
                     "layout": {
@@ -1577,30 +1495,23 @@ def register_callbacks(app):
                     html.Div(error_msg),
                 )
 
-            # Log the head of the dataframe to check the data
             logger.info(f"DataFrame head before plotting: {df.head().to_dict()}")
             logger.info(f"DataFrame shape: {df.shape}")
             logger.info(f"DataFrame columns: {df.columns.tolist()}")
 
-            # Make a copy to avoid modifying the original data
             df = df.copy()
 
-            # Calculate technical indicators for each metal with custom parameters
             for metal in df["metal_type"].unique():
                 metal_df = calculate_indicators(
                     df[df["metal_type"] == metal].copy(), metal, custom_indicators
                 )
-                # Update the main dataframe with calculated indicators
                 for col in metal_df.columns:
                     if col not in df.columns:
                         df[col] = None
-                    # Update values for this metal only
                     df.loc[df["metal_type"] == metal, col] = metal_df[col].values
 
-            # Store data for potential export
             stored_data = df.to_json(date_format="iso", orient="split")
 
-            # Create main chart based on chart type
             if chart_type == "histogram":
                 main_fig = create_histogram_chart(df)
             elif chart_type == "box_plot":
@@ -1615,18 +1526,14 @@ def register_callbacks(app):
                 result = create_advanced_chart(
                     df, price_series, moving_avgs, bollinger_bands, other_indicators
                 )
-                # Check if result is a dictionary or a figure
                 if isinstance(result, dict):
                     main_fig = result["main_fig"]
                 else:
                     main_fig = result
-            # Create volatility chart
             volatility_fig = create_volatility_chart(df)
 
-            # Create statistics summary
             stats_component = create_statistics_summary(df)
 
-            # Create data table
             table_component = create_data_table(df, timeframe=timeframe)
 
             return (
@@ -1638,10 +1545,8 @@ def register_callbacks(app):
             )
 
         except Exception as e:
-            # Log the full error with traceback
             logger.exception(f"Error in update_dashboard: {str(e)}")
 
-            # Return empty figures with error message
             error_msg = f"An error occurred: {str(e)}"
             empty_fig = {
                 "data": [],
@@ -1653,14 +1558,13 @@ def register_callbacks(app):
             }
             return None, empty_fig, empty_fig, html.Div(error_msg), html.Div(error_msg)
 
-    # Initialize custom indicators on page load
     @app.callback(
         Output("custom-indicators-store", "data"),
         Input("dashboard-container", "children"),
         prevent_initial_call=False,
     )
-    def initialize_custom_indicators(_):
-        # Set up default indicators
+    def initialize_dashboard_custom_indicators(_):
+        # Установка up по умолчанию индикаторов
         return {
             "moving_avgs": [
                 {"type": "sma", "period": 10},
@@ -1675,7 +1579,6 @@ def register_callbacks(app):
             "rsi_period": 14,
         }
 
-    # Initialize moving averages checklist options based on custom indicators
     @app.callback(
         [
             Output("moving-avg-checklist", "options"),
@@ -1684,12 +1587,10 @@ def register_callbacks(app):
         Input("custom-indicators-store", "data"),
         prevent_initial_call=False,
     )
-    def initialize_moving_avg_options(custom_indicators):
-        # Standard periods for Moving Averages
+    def initialize_dashboard_moving_avg_options(custom_indicators):
         standard_sma_periods = [10, 20, 50]
         standard_ema_periods = [10, 20, 50]
 
-        # Get existing moving averages
         moving_avgs = []
         custom_sma = None
         custom_ema = None
@@ -1697,25 +1598,20 @@ def register_callbacks(app):
         if custom_indicators and "moving_avgs" in custom_indicators:
             moving_avgs = custom_indicators["moving_avgs"]
 
-            # Find custom SMA and EMA if they exist
             for ma in moving_avgs:
                 if ma["type"] == "sma" and ma["period"] not in standard_sma_periods:
                     custom_sma = ma["period"]
                 elif ma["type"] == "ema" and ma["period"] not in standard_ema_periods:
                     custom_ema = ma["period"]
 
-        # Create options for dropdown
         options = []
 
-        # Add standard SMA options
         for period in standard_sma_periods:
             options.append({"label": f"SMA {period}", "value": f"sma_{period}"})
 
-        # Add standard EMA options
         for period in standard_ema_periods:
             options.append({"label": f"EMA {period}", "value": f"ema_{period}"})
 
-        # Add custom SMA if it exists
         if custom_sma:
             options.append(
                 {
@@ -1724,7 +1620,7 @@ def register_callbacks(app):
                 }
             )
 
-        # Add custom EMA if it exists
+        # Добавление custom EMA if it exists
         if custom_ema:
             options.append(
                 {
@@ -1733,12 +1629,10 @@ def register_callbacks(app):
                 }
             )
 
-        # Sort options by type and period
         options.sort(
             key=lambda x: (x["value"].split("_")[0], int(x["value"].split("_")[1]))
         )
 
-        # By default, only include custom indicators in values
         values = []
         if custom_sma:
             values.append(f"sma_{custom_sma}")
@@ -1747,23 +1641,20 @@ def register_callbacks(app):
 
         return options, values
 
-    # Initialize other indicators based on custom parameters
     @app.callback(
         Output("other-indicators-checklist", "value", allow_duplicate=True),
         Input("custom-indicators-store", "data"),
         prevent_initial_call="initial_duplicate",
     )
-    def initialize_other_indicators(custom_indicators):
-        # Default to RSI active
+    def initialize_dashboard_other_indicators(custom_indicators):
         return ["rsi"]
 
-    # Update RSI label based on period
     @app.callback(
         Output("other-indicators-checklist", "options"),
         Input("rsi-period-input", "value"),
         prevent_initial_call=False,
     )
-    def update_rsi_label(rsi_period):
+    def update_dashboard_rsi_label(rsi_period):
         if rsi_period is None:
             rsi_period = 14
 
@@ -1776,7 +1667,7 @@ def register_callbacks(app):
         [Input("other-indicators-checklist", "value")],
     )
     def update_rsi_spacer(other_indicators):
-        # Add extra space when RSI is displayed to prevent overlapping
+        # Добавление extra space when RSI is displayed к prevent overlapping
         if "rsi" in other_indicators:
             return {"height": "210px"}
         return {"height": "10px"}  # Small height even when no RSI
@@ -1786,7 +1677,6 @@ def register_callbacks(app):
         [Input("other-indicators-checklist", "value")],
     )
     def update_chart_height(other_indicators):
-        # Increase chart height when RSI is shown
         if "rsi" in other_indicators:
             return {"height": "68vh"}
         return {"height": "54vh"}
@@ -1802,12 +1692,11 @@ def register_callbacks(app):
         ],
         prevent_initial_call=True,
     )
-    def update_moving_averages(sma_period, ema_period, custom_indicators):
-        # Determine which element triggered the callback
+    def update_dashboard_moving_averages(sma_period, ema_period, custom_indicators):
         context = callback_context
         trigger_id = context.triggered[0]["prop_id"].split(".")[0]
 
-        # Initialize data if needed - preserve existing moving averages
+        # Инициализация данных if needed - preserve existing скользящих средних
         if custom_indicators is None:
             custom_indicators = {"moving_avgs": []}
 
@@ -1816,33 +1705,27 @@ def register_callbacks(app):
 
         moving_avgs = custom_indicators["moving_avgs"]
 
-        # Standard periods for reference
         standard_sma_periods = [5, 10, 20, 50, 100, 200]
         standard_ema_periods = [5, 10, 20, 50, 100, 200]
 
-        # Handle SMA period change
         if trigger_id == "sma-period-input" and sma_period is not None:
-            # Check if SMA with this period already exists
             sma_exists = any(
                 ma["type"] == "sma" and ma["period"] == sma_period for ma in moving_avgs
             )
 
-            # Add new SMA if it doesn't exist and isn't a standard one
+            # Добавление new SMA if it doesn't exist and isn't a standard one
             if not sma_exists and sma_period not in standard_sma_periods:
                 moving_avgs.append({"type": "sma", "period": sma_period})
 
-        # Handle EMA period change
         elif trigger_id == "ema-period-input" and ema_period is not None:
-            # Check if EMA with this period already exists
+            # Проверка if EMA with this периода already exists
             ema_exists = any(
                 ma["type"] == "ema" and ma["period"] == ema_period for ma in moving_avgs
             )
 
-            # Add new EMA if it doesn't exist and isn't a standard one
             if not ema_exists and ema_period not in standard_ema_periods:
                 moving_avgs.append({"type": "ema", "period": ema_period})
 
-        # Update the list in custom_indicators
         custom_indicators["moving_avgs"] = moving_avgs
 
         return custom_indicators
@@ -1852,38 +1735,30 @@ def register_callbacks(app):
         Input({"type": "export-metal-button", "metal": ALL}, "n_clicks"),
         [
             State("chart-data-store", "data"),
-            State(
-                {"type": "filtered-data-table", "metal": ALL}, "derived_virtual_data"
-            ),
+            State({"type": "filtered-data-table", "metal": ALL}, "rowData"),
             State("timeframe-dropdown", "value"),  # Add timeframe state
         ],
     )
     def export_metal_data_excel(
         n_clicks_list, stored_data, filtered_data_list, timeframe
     ):
-        # Get the context to determine which button was clicked
         ctx = callback_context
 
         if not ctx.triggered:
             return [None] * len(n_clicks_list)
 
-        # Get the id of the button that was clicked
         button_id = ctx.triggered[0]["prop_id"].split(".")[0]
         triggered_metal = json.loads(button_id)["metal"]
 
-        # Create a list of None values for all outputs
         outputs = [None] * len(n_clicks_list)
 
         # Ensure timeframe has a valid value
         if not timeframe or timeframe not in ["1H", "4H", "1D"]:
             timeframe = "1D"  # Default to daily timeframe
 
-        # Find the index of the triggered button
         for i, button_prop in enumerate(ctx.inputs_list[0]):
-            # Get the metal from the button ID
             metal = button_prop["id"]["metal"]
             if metal == triggered_metal:
-                # This is the button that was clicked
                 if n_clicks_list[i] > 0:
                     try:
                         from loguru import logger
@@ -1892,27 +1767,23 @@ def register_callbacks(app):
                             f"Excel export triggered for {metal} with timeframe {timeframe}: n_clicks={n_clicks_list[i]}"
                         )
 
-                        # Try to use filtered data first
                         if (
                             filtered_data_list
                             and i < len(filtered_data_list)
                             and filtered_data_list[i]
                         ):
-                            # We have filtered data available
+                            # We have filtered данных available
                             logger.info(
                                 f"Using filtered data for export: {len(filtered_data_list[i])} records"
                             )
 
-                            # Convert to DataFrame
                             filtered_df = pd.DataFrame(filtered_data_list[i])
 
-                            # Sort by date (newest first)
                             if "date" in filtered_df.columns:
                                 filtered_df = filtered_df.sort_values(
                                     "date", ascending=False
                                 )
 
-                            # Determine filename based on timeframe
                             if timeframe == "1D":
                                 filename = f"{metal.lower()}_daily_filtered_data.xlsx"
                                 sheet_name = f"{metal} Daily Data"
@@ -1929,30 +1800,24 @@ def register_callbacks(app):
                                 index=False,
                             )
                         elif stored_data is not None:
-                            # Fall back to original data if filtered not available
                             logger.info(
                                 "Filtered data not available, using original data"
                             )
 
-                            # Parse stored data
                             df = pd.read_json(stored_data, orient="split")
 
-                            # Filter for this metal's data
+                            # Фильтрация для this metal's данных
                             metal_df = df[df["metal_type"] == metal].copy()
 
-                            # If no data is found
                             if metal_df.empty:
                                 logger.warning(
                                     f"No {metal} data found for Excel export"
                                 )
                                 continue
 
-                            # Process the data based on timeframe
                             if timeframe == "1D":
-                                # For daily timeframe
                                 metal_df["date"] = metal_df["timestamp"].dt.date
 
-                                # Group by date for daily OHLC values
                                 processed_df = (
                                     metal_df.groupby("date")
                                     .agg(
@@ -1966,7 +1831,6 @@ def register_callbacks(app):
                                     .reset_index()
                                 )
 
-                                # Calculate change
                                 processed_df["price_change"] = (
                                     processed_df["close_price"]
                                     - processed_df["open_price"]
@@ -1976,7 +1840,6 @@ def register_callbacks(app):
                                     / processed_df["open_price"]
                                 ) * 100
 
-                                # Sort by date (newest first)
                                 processed_df = processed_df.sort_values(
                                     "date", ascending=False
                                 )
@@ -1984,15 +1847,13 @@ def register_callbacks(app):
                                 filename = f"{metal.lower()}_daily_price_data.xlsx"
                                 sheet_name = f"{metal} Daily Prices"
                             else:
-                                # For hourly timeframes, keep the original timestamp
+                                # для hourly timeframes, keep  original временная метка
                                 processed_df = metal_df.copy()
 
-                                # Rename timestamp column for clarity
                                 processed_df = processed_df.rename(
                                     columns={"timestamp": "date"}
                                 )
 
-                                # Calculate change
                                 processed_df["price_change"] = (
                                     processed_df["close_price"]
                                     - processed_df["open_price"]
@@ -2002,7 +1863,6 @@ def register_callbacks(app):
                                     / processed_df["open_price"]
                                 ) * 100
 
-                                # Sort by timestamp (newest first)
                                 processed_df = processed_df.sort_values(
                                     "date", ascending=False
                                 )
@@ -2033,104 +1893,99 @@ def register_callbacks(app):
 
 
 def create_volatility_chart(df):
-    # Create a dataframe for volatility
     volatility_df = df.copy()
 
     # Ensure we're using a clean DataFrame
     if not isinstance(volatility_df.index, pd.RangeIndex):
         volatility_df = volatility_df.reset_index()
 
-    # Calculate volatility if it doesn't exist
     if "volatility" not in volatility_df.columns:
-        # Group by metal type to calculate volatility for each metal separately
         metals = volatility_df["metal_type"].unique()
         for metal in metals:
-            # Get data for this metal
-            metal_mask = volatility_df["metal_type"] == metal
-            metal_data = volatility_df[metal_mask].copy()
+            metal_df = volatility_df[volatility_df["metal_type"] == metal].copy()
 
-            # Sort by timestamp
-            metal_data = metal_data.sort_values("timestamp")
+            metal_df = metal_df.sort_values("timestamp")
 
-            # Calculate daily returns (percentage change)
-            metal_data["daily_return"] = metal_data["close_price"].pct_change() * 100
-
-            # Calculate 7-day rolling volatility (standard deviation of returns)
-            metal_data["volatility"] = (
-                metal_data["daily_return"].rolling(window=7).std()
+            metal_df["price_change"] = metal_df["close_price"].diff()
+            metal_df["volatility"] = (
+                metal_df["price_change"]
+                .rolling(window=20, min_periods=1)
+                .std()
+                .fillna(0)
             )
 
-            # Update the main dataframe
-            volatility_df.loc[metal_mask, "volatility"] = metal_data[
-                "volatility"
-            ].values
+            volatility_df.loc[volatility_df["metal_type"] == metal, "volatility"] = (
+                metal_df["volatility"].values
+            )
+            volatility_df.loc[volatility_df["metal_type"] == metal, "price_change"] = (
+                metal_df["price_change"].values
+            )
 
-    # Remove NaN values to prevent plotting issues
-    volatility_df = volatility_df.dropna(subset=["volatility"])
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
 
-    # Create a new dataframe with only the columns we need for this chart
-    plot_df = volatility_df[["timestamp", "metal_type", "volatility"]].copy()
+    # Добавление price lines для each metal
+    for metal in volatility_df["metal_type"].unique():
+        metal_df = volatility_df[volatility_df["metal_type"] == metal].copy()
+        metal_df = metal_df.sort_values("timestamp")
 
-    # Create volatility chart
-    fig = px.line(
-        plot_df,
-        x="timestamp",
-        y="volatility",
-        color="metal_type",
-        title="7-Day Rolling Volatility",
-        labels={
-            "volatility": "Volatility (% Std Dev)",
-            "timestamp": "Date",
-            "metal_type": "Metal",
-        },
-    )
+        fig.add_trace(
+            go.Scatter(
+                x=metal_df["timestamp"],
+                y=metal_df["close_price"],
+                name=f"{metal} Price",
+                line=dict(width=2),
+            ),
+            secondary_y=False,
+        )
 
-    # Find a reasonable y-axis range based on the data
-    max_vol = plot_df["volatility"].max()
-    y_max = max(max_vol * 1.2, 10)  # At least 10% or up to 20% above max value
+        fig.add_trace(
+            go.Scatter(
+                x=metal_df["timestamp"],
+                y=metal_df["volatility"],
+                name=f"{metal} Volatility",
+                line=dict(width=1, dash="dot"),
+                opacity=0.7,
+            ),
+            secondary_y=True,
+        )
 
+    # Обновление layout
     fig.update_layout(
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
-        margin=dict(l=40, r=40, t=40, b=40),
+        title="Price and Volatility Comparison",
+        xaxis_title="Date",
+        legend_title="Metrics",
         hovermode="x unified",
-        yaxis=dict(
-            title="Volatility (% Std Dev)",
-            range=[0, y_max],  # Set Y-axis range from 0 to calculated max
-        ),
+        paper_bgcolor="rgba(0,0,0,0)",  # Transparent background
+        plot_bgcolor="rgba(0,0,0,0)",  # Transparent plot area
     )
+
+    fig.update_yaxes(title_text="Price", secondary_y=False)
+    fig.update_yaxes(title_text="Volatility (StdDev)", secondary_y=True)
 
     return fig
 
 
 def create_statistics_summary(df):
-    # Create a statistics summary for each metal
     metals = df["metal_type"].unique()
 
-    # Create a list of cards for each metal
     cards = []
 
     for metal in metals:
-        # Filter data for this metal only
         metal_df = df[df["metal_type"] == metal].copy()
 
-        # Calculate statistics only from price columns
         try:
-            # Calculate statistics
             current_price = metal_df["close_price"].iloc[-1]
             avg_price = metal_df["close_price"].mean()
             min_price = metal_df["close_price"].min()
             max_price = metal_df["close_price"].max()
 
-            # Calculate price change
             first_price = metal_df["close_price"].iloc[0]
             price_change = current_price - first_price
             price_change_pct = (price_change / first_price) * 100
 
-            # Calculate volatility (standard deviation of daily returns)
             daily_returns = metal_df["close_price"].pct_change() * 100
             volatility = daily_returns.std()
 
-            # Create card
             card = dbc.Card(
                 [
                     dbc.CardHeader(metal, className="text-center fw-bold"),
@@ -2195,7 +2050,6 @@ def create_statistics_summary(df):
 
             cards.append(card)
         except Exception as e:
-            # If there's an error calculating statistics, log it and skip this metal
             logger.error(f"Error calculating statistics for {metal}: {e}")
             continue
 
@@ -2220,22 +2074,18 @@ def create_advanced_chart(
                         or a single Figure for simple charts
     """
     try:
-        # Create a copy of the dataframe to avoid modifications
+        # Создание a copy of  dataframe к avoid modifications
         plot_df = df.copy()
 
-        # Make sure we have a date column available
         if "date" not in plot_df.columns and "timestamp" in plot_df.columns:
             plot_df["date"] = plot_df["timestamp"]
 
-        # Determine unique metals in the data
         metals = plot_df["metal_type"].unique()
 
-        # Determine if we should show RSI
         show_rsi = "rsi" in other_indicators
 
-        # For multiple metals with RSI, create a chart with subplots
         if len(metals) > 1 and show_rsi:
-            # Create a figure with subplots for RSI
+            # Создание a figure with subplots для RSI
             fig = make_subplots(
                 rows=2,
                 cols=1,
@@ -2245,15 +2095,12 @@ def create_advanced_chart(
                 subplot_titles=["Metals Price Comparison", "RSI"],
             )
 
-            # Add price series for each metal
             for metal in metals:
                 metal_df = plot_df[plot_df["metal_type"] == metal].copy()
 
-                # Drop any NaN values for close price
                 metal_df = metal_df.dropna(subset=["close_price"])
 
                 if not metal_df.empty:
-                    # Add close price line for each metal
                     fig.add_trace(
                         go.Scatter(
                             x=metal_df["date"],
@@ -2265,9 +2112,7 @@ def create_advanced_chart(
                         col=1,
                     )
 
-                    # Add moving averages for each metal
                     for ma in moving_avgs:
-                        # Handle both string format and dictionary format
                         if isinstance(ma, dict):
                             ma_type = ma["type"]
                             period = ma["period"]
@@ -2280,10 +2125,8 @@ def create_advanced_chart(
                                 ma_type, period = ma.split("_")
                                 ma_type_upper = ma_type.upper()
                             except (ValueError, AttributeError):
-                                # Skip this MA if it can't be parsed
                                 continue
 
-                        # Check if the column exists in the dataframe
                         if column_name in metal_df.columns:
                             fig.add_trace(
                                 go.Scatter(
@@ -2297,13 +2140,11 @@ def create_advanced_chart(
                                 col=1,
                             )
 
-                    # Add Bollinger Bands
                     if "bb" in bollinger_bands:
                         if all(
                             col in metal_df.columns
                             for col in ["bb_upper", "bb_middle", "bb_lower"]
                         ):
-                            # Upper band
                             fig.add_trace(
                                 go.Scatter(
                                     x=metal_df["date"],
@@ -2319,7 +2160,7 @@ def create_advanced_chart(
                                 col=1,
                             )
 
-                            # Middle band
+                            # средняя полоса
                             fig.add_trace(
                                 go.Scatter(
                                     x=metal_df["date"],
@@ -2335,7 +2176,6 @@ def create_advanced_chart(
                                 col=1,
                             )
 
-                            # Lower band
                             fig.add_trace(
                                 go.Scatter(
                                     x=metal_df["date"],
@@ -2351,7 +2191,7 @@ def create_advanced_chart(
                                 col=1,
                             )
 
-                    # Add RSI
+                    # Добавление RSI
                     rsi_df = metal_df.dropna(subset=["rsi"])
                     if not rsi_df.empty:
                         fig.add_trace(
@@ -2366,13 +2206,12 @@ def create_advanced_chart(
                             col=1,
                         )
 
-            # Add RSI reference lines
             rsi_data = plot_df.dropna(subset=["rsi"])
             if not rsi_data.empty:
                 min_date = rsi_data["date"].min()
                 max_date = rsi_data["date"].max()
 
-                # Add overbought/oversold lines
+                # Добавление overbought/oversold lines
                 fig.add_shape(
                     type="line",
                     x0=min_date,
@@ -2395,7 +2234,7 @@ def create_advanced_chart(
                     col=1,
                 )
 
-                # Add 50 level line
+                # Добавление 50 level line
                 fig.add_shape(
                     type="line",
                     x0=min_date,
@@ -2407,28 +2246,27 @@ def create_advanced_chart(
                     col=1,
                 )
 
-            # Update Y-axis labels
             fig.update_yaxes(title_text="Price (USD)", row=1, col=1)
             fig.update_yaxes(title_text="RSI", range=[0, 100], row=2, col=1)
 
-            # Update layout
             fig.update_layout(
-                title="Advanced Price Analysis with RSI",
-                xaxis_title="Date",
-                height=800,  # Fixed taller height for RSI
-                margin=dict(l=40, r=40, t=50, b=40),
-                hovermode="x unified",
+                height=800 if show_rsi else 600,
                 legend=dict(
-                    orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5
+                    orientation="h", y=1.02, yanchor="bottom", xanchor="center", x=0.5
                 ),
+                hovermode="x unified",
+                xaxis=dict(
+                    title="Date",
+                    rangeslider=dict(visible=False),
+                ),
+                yaxis=dict(title="Price"),
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
             )
 
             return fig
 
-        # For single metal charts or multiple metals without RSI, use standard approach
-        # Create a base figure with subplots if RSI is selected
         if show_rsi:
-            # Create figure with two subplots
             main_fig = make_subplots(
                 rows=2,
                 cols=1,
@@ -2442,17 +2280,13 @@ def create_advanced_chart(
                 ),
             )
         else:
-            # Create a main figure with just one plot
             main_fig = make_subplots(rows=1, cols=1)
 
-        # Track the y-axis range to ensure consistent scales
         y_min, y_max = float("inf"), float("-inf")
 
-        # Add traces for each metal
         for metal in metals:
             metal_df = plot_df[plot_df["metal_type"] == metal]
 
-            # Add price series based on selection
             if "close" in price_series:
                 main_fig.add_trace(
                     go.Scatter(
@@ -2513,25 +2347,21 @@ def create_advanced_chart(
                 y_min = min(y_min, metal_df["low_price"].min())
                 y_max = max(y_max, metal_df["low_price"].max())
 
-            # Add moving averages
+            # Добавление скользящих средних
             for ma in moving_avgs:
-                # Handle both string format and dictionary format
                 if isinstance(ma, dict):
                     ma_type = ma["type"]
                     period = ma["period"]
                     column_name = f"{ma_type}_{period}"
                     ma_type_upper = ma_type.upper()
                 else:
-                    # Legacy string format (e.g. "sma_20")
                     column_name = ma
                     try:
                         ma_type, period = ma.split("_")
                         ma_type_upper = ma_type.upper()
                     except (ValueError, AttributeError):
-                        # Skip this MA if it can't be parsed
                         continue
 
-                # Check if the column exists in the dataframe
                 if column_name in metal_df.columns:
                     main_fig.add_trace(
                         go.Scatter(
@@ -2545,13 +2375,11 @@ def create_advanced_chart(
                         col=1,
                     )
 
-            # Add Bollinger Bands
             if "bb" in bollinger_bands:
                 if all(
                     col in metal_df.columns
                     for col in ["bb_upper", "bb_middle", "bb_lower"]
                 ):
-                    # Upper band
                     main_fig.add_trace(
                         go.Scatter(
                             x=metal_df["date"],
@@ -2564,7 +2392,6 @@ def create_advanced_chart(
                         col=1,
                     )
 
-                    # Middle band (typically the SMA)
                     main_fig.add_trace(
                         go.Scatter(
                             x=metal_df["date"],
@@ -2577,7 +2404,6 @@ def create_advanced_chart(
                         col=1,
                     )
 
-                    # Lower band
                     main_fig.add_trace(
                         go.Scatter(
                             x=metal_df["date"],
@@ -2592,12 +2418,11 @@ def create_advanced_chart(
                         col=1,
                     )
 
-            # Add RSI if selected
+            # Добавление RSI if selected
             if show_rsi and "rsi" in metal_df.columns:
                 rsi_df = metal_df.dropna(subset=["rsi"])
 
                 if not rsi_df.empty:
-                    # Add RSI line
                     main_fig.add_trace(
                         go.Scatter(
                             x=rsi_df["date"],
@@ -2610,14 +2435,12 @@ def create_advanced_chart(
                         col=1,
                     )
 
-        # If we're showing RSI, add reference lines
         if show_rsi:
-            # Get the overall date range
             date_range = plot_df["date"]
             min_date = date_range.min()
             max_date = date_range.max()
 
-            # Add overbought line (70)
+            # Добавление overbought line (70)
             main_fig.add_shape(
                 type="line",
                 x0=min_date,
@@ -2629,7 +2452,7 @@ def create_advanced_chart(
                 col=1,
             )
 
-            # Add oversold line (30)
+            # Добавление oversold line (30)
             main_fig.add_shape(
                 type="line",
                 x0=min_date,
@@ -2641,7 +2464,6 @@ def create_advanced_chart(
                 col=1,
             )
 
-            # Add middle line (50)
             main_fig.add_shape(
                 type="line",
                 x0=min_date,
@@ -2653,10 +2475,9 @@ def create_advanced_chart(
                 col=1,
             )
 
-            # Update RSI y-axis range
             main_fig.update_yaxes(title_text="RSI", range=[0, 100], row=2, col=1)
 
-        # Update layout for the main figure
+        # Обновление layout для  main figure
         title = "Advanced Price Chart"
         if len(metals) == 1:
             title += f" - {metals[0]}"
@@ -2676,17 +2497,14 @@ def create_advanced_chart(
         )
 
         if show_rsi:
-            # Create a single combined figure
             return main_fig
         else:
-            # For non-RSI cases, return the main figure
             return main_fig
 
     except Exception as e:
         from loguru import logger
 
         logger.exception(f"Error creating advanced chart: {str(e)}")
-        # Return a simple error chart
         error_fig = go.Figure()
         error_fig.add_annotation(
             text=f"Error creating chart: {str(e)}",
@@ -2707,15 +2525,12 @@ def create_data_table(df, timeframe="1D"):
         df (pd.DataFrame): DataFrame containing the price data
         timeframe (str): The selected timeframe ("1H", "4H", or "1D")
     """
-    # Process the dataframe for display
     display_df = df.copy()
 
-    # Convert timestamp to date for grouping
+    # Преобразование временная метка к date для grouping
     if timeframe == "1D":
-        # For daily timeframe, aggregate by date
         display_df["date"] = display_df["timestamp"].dt.date
 
-        # Group by date and metal_type for daily values
         result_df = (
             display_df.groupby(["date", "metal_type"])
             .agg(
@@ -2729,36 +2544,30 @@ def create_data_table(df, timeframe="1D"):
             .reset_index()
         )
 
-        # Sort by date (newest first) and metal type
+        # Сортировка by date (newest first) and metal type
         result_df = result_df.sort_values(
             ["date", "metal_type"], ascending=[False, True]
         )
 
-        # Date label for table header
+        # Date label для table header
         date_label = "Date"
     else:
-        # For hourly timeframes, use the full timestamp
         result_df = display_df.copy()
 
-        # Rename timestamp column to date for consistency with the table structure
         result_df = result_df.rename(columns={"timestamp": "date"})
 
-        # Sort by timestamp (newest first) and metal type
         result_df = result_df.sort_values(
             ["date", "metal_type"], ascending=[False, True]
         )
 
-        # Date label with timeframe indicator
         date_label = f"Timestamp ({timeframe})"
 
-    # Calculate change
     result_df["price_change"] = result_df["close_price"] - result_df["open_price"]
     result_df["price_change_pct"] = result_df["price_change"] / result_df["open_price"]
 
-    # Create a list of DataTable for each metal
     tables = []
 
-    # Create an exports section for all metals
+    # Создание an exports section для all металлов
     export_section = html.Div(
         [
             html.H5("Exports", className="mt-4 mb-3"),
@@ -2770,106 +2579,91 @@ def create_data_table(df, timeframe="1D"):
         ]
     )
 
-    # Create export buttons for each metal
     export_buttons = []
 
-    # Add data stores for filtered table data
     stores = []
 
     for metal in result_df["metal_type"].unique():
         metal_data = result_df[result_df["metal_type"] == metal]
 
-        # Format the data for the DataTable
         metal_records = metal_data.to_dict("records")
 
-        # Create store for filtered data
         store_id = f"filtered-data-{metal.lower().replace(' ', '-')}"
         stores.append(dcc.Store(id=store_id, data=metal_records))
 
         # Title with timeframe info
         title = f"{metal} Price Data ({timeframe})"
 
-        # Create the table
+        columnDefs = [
+            {"headerName": date_label, "field": "date"},
+            {
+                "headerName": "Open",
+                "field": "open_price",
+                "valueFormatter": {"function": "d3.format('$.2f')(params.value)"},
+            },
+            {
+                "headerName": "High",
+                "field": "high_price",
+                "valueFormatter": {"function": "d3.format('$.2f')(params.value)"},
+            },
+            {
+                "headerName": "Low",
+                "field": "low_price",
+                "valueFormatter": {"function": "d3.format('$.2f')(params.value)"},
+            },
+            {
+                "headerName": "Close",
+                "field": "close_price",
+                "valueFormatter": {"function": "d3.format('$.2f')(params.value)"},
+            },
+            {
+                "headerName": "Change",
+                "field": "price_change",
+                "valueFormatter": {"function": "d3.format('+$.2f')(params.value)"},
+                "cellStyle": {
+                    "styleConditions": [
+                        {"condition": "params.value < 0", "style": {"color": "red"}},
+                        {"condition": "params.value > 0", "style": {"color": "green"}},
+                    ]
+                },
+            },
+            {
+                "headerName": "Change %",
+                "field": "price_change_pct",
+                "valueFormatter": {"function": "d3.format('+.2%')(params.value)"},
+                "cellStyle": {
+                    "styleConditions": [
+                        {"condition": "params.value < 0", "style": {"color": "red"}},
+                        {"condition": "params.value > 0", "style": {"color": "green"}},
+                    ]
+                },
+            },
+        ]
+
         table = html.Div(
             [
                 html.H5(title, className="mt-3 mb-2"),
-                dash_table.DataTable(
+                dag.AgGrid(
                     id={"type": "filtered-data-table", "metal": metal},
-                    columns=[
-                        {"name": date_label, "id": "date"},
-                        {
-                            "name": "Open",
-                            "id": "open_price",
-                            "type": "numeric",
-                            "format": {"specifier": "$.2f"},
-                        },
-                        {
-                            "name": "High",
-                            "id": "high_price",
-                            "type": "numeric",
-                            "format": {"specifier": "$.2f"},
-                        },
-                        {
-                            "name": "Low",
-                            "id": "low_price",
-                            "type": "numeric",
-                            "format": {"specifier": "$.2f"},
-                        },
-                        {
-                            "name": "Close",
-                            "id": "close_price",
-                            "type": "numeric",
-                            "format": {"specifier": "$.2f"},
-                        },
-                        {
-                            "name": "Change",
-                            "id": "price_change",
-                            "type": "numeric",
-                            "format": {"specifier": "+$.2f"},
-                        },
-                        {
-                            "name": "Change %",
-                            "id": "price_change_pct",
-                            "type": "numeric",
-                            "format": {"specifier": "+.2%"},
-                        },
-                    ],
-                    data=metal_records,
-                    style_table={"overflowX": "auto"},
-                    style_cell={
-                        "textAlign": "right",
-                        "padding": "5px",
-                        "backgroundColor": "transparent",
+                    columnDefs=columnDefs,
+                    rowData=metal_records,
+                    dashGridOptions={
+                        "pagination": True,
+                        "paginationAutoPageSize": True,
                     },
-                    style_header={
-                        "fontWeight": "bold",
-                        "backgroundColor": "lightgray",
+                    defaultColDef={
+                        "sortable": True,
+                        "filter": True,
+                        "resizable": True,
                     },
-                    style_data_conditional=[
-                        {
-                            "if": {"filter_query": "{price_change} < 0"},
-                            "color": "red",
-                        },
-                        {
-                            "if": {"filter_query": "{price_change} > 0"},
-                            "color": "green",
-                        },
-                    ],
-                    page_size=10,  # Show 10 rows per page
-                    filter_action="native",  # Allow filtering
-                    sort_action="native",  # Allow sorting
-                    sort_mode="multi",  # Allow sorting by multiple columns
-                    style_as_list_view=True,
-                    # Add callback on filtered and sorted data
-                    persistence=True,  # Allow persisting filter settings
-                    persistence_type="session",  # Store in session
+                    persistence=True,
+                    persistence_type="session",
                 ),
             ]
         )
 
         tables.append(table)
 
-        # Create export button for this metal
         export_button = dbc.Button(
             f"Export {metal} Data as Excel",
             id={"type": "export-metal-button", "metal": metal},
@@ -2878,20 +2672,17 @@ def create_data_table(df, timeframe="1D"):
             n_clicks=0,
         )
 
-        # Add to our list of export buttons
         export_buttons.append(export_button)
 
-    # Set all the export buttons at once
+    # Установка all  export buttons at once
     export_section.children[1].children = export_buttons
 
-    # Add export section at the end
     tables.append(export_section)
 
-    # Add stores for filtered data
     for store in stores:
         tables.append(store)
 
-    # Add multiple download components for each metal
+    # Добавление multiple download components для each metal
     for metal in result_df["metal_type"].unique():
         tables.append(dcc.Download(id={"type": "download-metal-excel", "metal": metal}))
 
@@ -2899,194 +2690,336 @@ def create_data_table(df, timeframe="1D"):
 
 
 def create_histogram_chart(df):
-    """Create a histogram chart showing price distribution"""
-    # Create a copy of the dataframe
-    plot_df = df.copy()
+    """Create a histogram showing distribution of metal prices"""
+    # Prepare данных для histogram
+    histogram_data = []
 
-    # Create a histogram chart using plotly express
-    fig = px.histogram(
-        plot_df,
-        x="close_price",
-        color="metal_type",
-        nbins=30,
-        opacity=0.7,
+    for metal in df["metal_type"].unique():
+        metal_df = df[df["metal_type"] == metal].copy()
+        histogram_data.append(
+            go.Histogram(
+                x=metal_df["close_price"],
+                name=metal,
+                opacity=0.7,
+                nbinsx=30,
+            )
+        )
+
+    layout = go.Layout(
         title="Price Distribution",
-        labels={
-            "close_price": "Price (USD)",
-            "count": "Frequency",
-            "metal_type": "Metal",
-        },
-        marginal="box",
-    )
-
-    fig.update_layout(
+        xaxis=dict(title="Price"),
+        yaxis=dict(title="Frequency"),
+        barmode="overlay",
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
-        margin=dict(l=40, r=40, t=40, b=40),
-        bargap=0.1,
+        hovermode="x unified",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
     )
 
+    # Создание figure
+    fig = go.Figure(data=histogram_data, layout=layout)
     return fig
 
 
 def create_box_plot_chart(df):
-    """Create a box plot chart for price analysis"""
-    # Create a copy of the dataframe
-    plot_df = df.copy()
+    """Create a box plot showing price distribution statistics"""
+    fig = go.Figure()
 
-    # Create a box plot using plotly express
-    fig = px.box(
-        plot_df,
-        y="close_price",
-        x="metal_type",
-        color="metal_type",
-        title="Price Distribution Analysis",
-        labels={
-            "close_price": "Price (USD)",
-            "metal_type": "Metal",
-        },
-        points="all",
-    )
+    for metal in df["metal_type"].unique():
+        metal_df = df[df["metal_type"] == metal].copy()
+        fig.add_trace(
+            go.Box(
+                y=metal_df["close_price"],
+                name=metal,
+                boxmean=True,  # Show mean as a dashed line
+                boxpoints="outliers",  # Only show outliers
+            )
+        )
 
     fig.update_layout(
+        title="Price Distribution by Metal",
+        yaxis=dict(title="Price"),
+        hovermode="y unified",
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
-        margin=dict(l=40, r=40, t=40, b=40),
-        showlegend=False,
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
     )
 
     return fig
 
 
 def create_candlestick_chart(df, price_series=None):
-    """Create a candlestick chart for price analysis"""
-    # Price series parameter is not used for candlestick but included for API compatibility
+    """Create a candlestick chart from the dataframe"""
+    if price_series is None:
+        price_series = ["open", "high", "low", "close"]
 
-    # Create a copy of the dataframe
-    plot_df = df.copy()
+    # Group by metal type and Создание subplots if more than one metal
+    metals = df["metal_type"].unique()
 
-    # Handle multiple metals by creating subplots
-    metals = plot_df["metal_type"].unique()
+    if len(metals) > 1:
+        rows = len(metals)
+        fig = make_subplots(rows=rows, cols=1, shared_xaxes=True, vertical_spacing=0.1)
 
-    # Create subplots - one for each metal
-    fig = make_subplots(
-        rows=len(metals),
-        cols=1,
-        shared_xaxes=True,
-        vertical_spacing=0.05,
-        subplot_titles=[f"{metal} Price" for metal in metals],
-    )
+        for i, metal in enumerate(metals):
+            metal_df = df[df["metal_type"] == metal].copy()
 
-    for i, metal in enumerate(metals, 1):
-        metal_df = plot_df[plot_df["metal_type"] == metal].copy()
+            fig.add_trace(
+                go.Candlestick(
+                    x=metal_df["timestamp"],
+                    open=metal_df["open_price"],
+                    high=metal_df["high_price"],
+                    low=metal_df["low_price"],
+                    close=metal_df["close_price"],
+                    name=metal,
+                    showlegend=False,
+                ),
+                row=i + 1,
+                col=1,
+            )
 
-        # Sort by timestamp to ensure data is in correct order
-        metal_df = metal_df.sort_values("timestamp")
+            fig.update_yaxes(
+                title_text=metal,
+                row=i + 1,
+                col=1,
+                showgrid=True,
+                gridwidth=1,
+                gridcolor="rgba(128, 128, 128, 0.2)",
+                zeroline=True,
+                zerolinewidth=1,
+                zerolinecolor="rgba(128, 128, 128, 0.5)",
+            )
 
-        # Filter out duplicate candles (where all OHLC values are identical to previous candle)
-        filtered_df = metal_df.iloc[0:1].copy()  # Keep the first row
+            # Configure x-axis для each subplot
+            if i == rows - 1:  # Only show x-axis title on the bottom subplot
+                fig.update_xaxes(
+                    title_text="Date",
+                    row=i + 1,
+                    col=1,
+                    showgrid=True,
+                    gridwidth=1,
+                    gridcolor="rgba(128, 128, 128, 0.2)",
+                )
+            else:
+                fig.update_xaxes(
+                    row=i + 1,
+                    col=1,
+                    showgrid=True,
+                    gridwidth=1,
+                    gridcolor="rgba(128, 128, 128, 0.2)",
+                )
 
-        for j in range(1, len(metal_df)):
-            current = metal_df.iloc[j]
-            previous = metal_df.iloc[j - 1]
+        # Обновление layout
+        fig.update_layout(
+            height=250 * rows,  # Adjust height based on number of metals
+            title="OHLC Candlestick Chart",
+            hovermode="x unified",
+            showlegend=False,
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+        )
+    else:
+        metal = metals[0]
+        metal_df = df[df["metal_type"] == metal].copy()
 
-            # Check if the current candle is different from the previous one
-            if (
-                current["open_price"] != previous["open_price"]
-                or current["high_price"] != previous["high_price"]
-                or current["low_price"] != previous["low_price"]
-                or current["close_price"] != previous["close_price"]
-            ):
-                filtered_df = pd.concat([filtered_df, current.to_frame().T])
-
-        # Add candlestick trace
-        fig.add_trace(
-            go.Candlestick(
-                x=filtered_df["timestamp"],
-                open=filtered_df["open_price"],
-                high=filtered_df["high_price"],
-                low=filtered_df["low_price"],
-                close=filtered_df["close_price"],
-                name=metal,
-                showlegend=False,
-            ),
-            row=i,
-            col=1,
+        fig = go.Figure(
+            data=[
+                go.Candlestick(
+                    x=metal_df["timestamp"],
+                    open=metal_df["open_price"],
+                    high=metal_df["high_price"],
+                    low=metal_df["low_price"],
+                    close=metal_df["close_price"],
+                    name=metal,
+                )
+            ]
         )
 
-        # Update y-axis label
-        fig.update_yaxes(title_text="Price (USD)", row=i, col=1)
+        # Configure axes with grid
+        fig.update_xaxes(
+            title_text="Date",
+            showgrid=True,
+            gridwidth=1,
+            gridcolor="rgba(128, 128, 128, 0.2)",
+        )
+        fig.update_yaxes(
+            title_text="Price",
+            showgrid=True,
+            gridwidth=1,
+            gridcolor="rgba(128, 128, 128, 0.2)",
+            zeroline=True,
+            zerolinewidth=1,
+            zerolinecolor="rgba(128, 128, 128, 0.5)",
+        )
 
-    # Update layout
+        # Обновление layout
+        fig.update_layout(
+            title=f"{metal} OHLC Candlestick Chart",
+            xaxis_title="Date",
+            yaxis_title="Price",
+            hovermode="x unified",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+        )
+
+    # Customize candlestick colors & hide rangeslider
     fig.update_layout(
-        title="Candlestick Chart",
-        xaxis_title="Date",
-        height=max(600, 300 * len(metals)),  # Dynamic height based on number of metals
-        margin=dict(l=40, r=40, t=40, b=40),
-        xaxis_rangeslider_visible=False,  # Disable rangeslider for cleaner look
+        xaxis_rangeslider_visible=False,
+    )
+
+    fig.update_layout(
+        template="plotly_dark"  # This templates will be overridden by CSS but provides base colors
     )
 
     return fig
 
 
 def create_comparison_chart(df):
-    """Create a comparison chart for multiple metals"""
-    # Create a copy of the dataframe
+    """Create a percentage change comparison chart from the dataframe"""
     plot_df = df.copy()
 
-    # Create a line chart comparing close prices
-    fig = px.line(
-        plot_df,
-        x="timestamp",
-        y="close_price",
-        color="metal_type",
-        title="Metal Price Comparison",
-        labels={
-            "close_price": "Price (USD)",
-            "timestamp": "Date",
-            "metal_type": "Metal",
-        },
+    fig = go.Figure()
+
+    # Получение list of металлов in  dataframe
+    metals = plot_df["metal_type"].unique()
+
+    for metal in metals:
+        metal_df = plot_df[plot_df["metal_type"] == metal].copy()
+
+        # Сортировка by date
+        metal_df = metal_df.sort_values("timestamp")
+
+        first_price = metal_df["close_price"].iloc[0]
+        metal_df["pct_change"] = (
+            (metal_df["close_price"] - first_price) / first_price * 100
+        )
+
+        fig.add_trace(
+            go.Scatter(
+                x=metal_df["timestamp"],
+                y=metal_df["pct_change"],
+                mode="lines",
+                name=metal,
+            )
+        )
+
+    fig.add_shape(
+        type="line",
+        x0=plot_df["timestamp"].min(),
+        x1=plot_df["timestamp"].max(),
+        y0=0,
+        y1=0,
+        line=dict(color="grey", width=1, dash="dash"),
     )
 
+    # Обновление layout
     fig.update_layout(
+        title="Metal Price Performance Comparison",
+        xaxis_title="Date",
+        yaxis_title="Percentage Change (%)",
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
-        margin=dict(l=40, r=40, t=40, b=40),
         hovermode="x unified",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
     )
 
     return fig
 
 
 def create_scatter_chart(df):
-    """Create a scatter plot for price analysis"""
-    # Create a copy of the dataframe
+    """Create a scatter chart showing metal prices over time
+
+    This implementation shows the actual price data points over time for each metal,
+    rather than the volatility vs return analysis that might be expected from a scatter plot.
+    It provides a clear view of price movements with both markers for individual data points
+    and connecting lines to show the trend.
+    """
     plot_df = df.copy()
 
-    # Calculate daily returns for x-axis
+    # Создание empty figure
+    fig = go.Figure()
+
     for metal in plot_df["metal_type"].unique():
-        mask = plot_df["metal_type"] == metal
-        plot_df.loc[mask, "daily_return"] = (
-            plot_df.loc[mask, "close_price"].pct_change() * 100
+        metal_df = plot_df[plot_df["metal_type"] == metal].copy()
+
+        metal_df = metal_df.sort_values("timestamp")
+
+        fig.add_trace(
+            go.Scatter(
+                x=metal_df["timestamp"],
+                y=metal_df["close_price"],
+                mode="markers+lines",
+                marker=dict(
+                    size=8,
+                    opacity=0.7,
+                ),
+                name=metal,
+            )
         )
 
-    # Create a scatter plot
-    fig = px.scatter(
-        plot_df.dropna(),  # Remove NaN values
-        x="daily_return",
-        y="close_price",
-        color="metal_type",
-        title="Price vs. Daily Return",
-        labels={
-            "daily_return": "Daily Return (%)",
-            "close_price": "Price (USD)",
-            "metal_type": "Metal",
-        },
-        size_max=10,
-        opacity=0.7,
+    fig.update_xaxes(
+        showgrid=True,
+        gridwidth=1,
+        gridcolor="rgba(128, 128, 128, 0.2)",
+        title="Date",
+    )
+    fig.update_yaxes(
+        showgrid=True,
+        gridwidth=1,
+        gridcolor="rgba(128, 128, 128, 0.2)",
+        title="Price",
+    )
+
+    # Обновление layout
+    fig.update_layout(
+        title="Metal Prices Scatter Plot",
+        hovermode="closest",
+        height=600,
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="center",
+            x=0.5,
+        ),
+    )
+
+    return fig
+
+
+def create_heatmap_chart(df):
+    """Create a correlation heatmap for metal prices"""
+    plot_df = df.copy()
+
+    pivot_df = plot_df.pivot_table(
+        index="timestamp", columns="metal_type", values="close_price"
+    )
+
+    corr_matrix = pivot_df.corr()
+
+    fig = go.Figure(
+        data=go.Heatmap(
+            z=corr_matrix.values,
+            x=corr_matrix.columns,
+            y=corr_matrix.index,
+            zmin=-1,  # Min value for correlation
+            zmax=1,  # Max value for correlation
+            colorscale="RdBu",
+            colorbar=dict(title="Correlation"),
+            text=np.around(corr_matrix.values, decimals=2),  # Add text values
+            texttemplate="%{text:.2f}",
+            hoverinfo="text",
+        )
     )
 
     fig.update_layout(
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
-        margin=dict(l=40, r=40, t=40, b=40),
-        hovermode="closest",
+        title="Metal Price Correlation Matrix",
+        xaxis=dict(title="Metal"),
+        yaxis=dict(title="Metal"),
+        height=600,
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
     )
 
     return fig

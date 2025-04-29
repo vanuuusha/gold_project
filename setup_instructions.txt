@@ -1,0 +1,25 @@
+# Precious Metals Analytics - Настройка и запуск
+
+## 1. Настройка базы данных MySQL
+
+
+CREATE DATABASE gold;
+CREATE USER 'gold'@'localhost' IDENTIFIED BY 'gold';
+GRANT ALL PRIVILEGES ON gold.* TO 'gold'@'localhost';
+FLUSH PRIVILEGES;
+
+## 2. Создание окружения
+
+conda env create -f environment.yml
+
+## 3. Инициализация базы данных
+
+
+cd database
+python init_database.py
+cd ..
+
+
+## 4. Запуск приложения
+
+python app.py

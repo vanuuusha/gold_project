@@ -11,96 +11,51 @@ from sqlalchemy import (
     create_engine,
     inspect,
     text,
+    and_,
+    func,
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 import enum
 import sys
 
 sys.path.append("..")
-from settings import DB_CONFIG, DB_URL
+from settings import DB_CONFIG, DB_URL, SOURCE_METALS_CONFIG
 from loguru import logger
 
-# Создание базового класса для декларативных моделей
 Base = declarative_base()
 
 
-# Определение перечисления типов металлов
 class MetalType(enum.Enum):
     GOLD = "gold"
     COPPER = "copper"
-    ALUMINUM = "aluminum"
 
 
-# Определение перечисления источников данных
 class DataSource(enum.Enum):
     YFINANCE = "yfinance"
-    ALPHAVANTAGE_API = "alphavantage_api"
 
 
-# Определение моделей
-class User(Base):
-    __tablename__ = "users"
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String(50), nullable=False, unique=True)
-    email = Column(String(100), nullable=False, unique=True)
-    password_hash = Column(String(255), nullable=False)
-    status = Column(String(20), nullable=False, default="active")
-    role = Column(String(20), nullable=False, default="user")
-    created_at = Column(DateTime, default=datetime.now)
-    last_login = Column(DateTime)
-
-    requests = relationship("UserRequest", back_populates="user")
-
-
-class UserRequest(Base):
-    __tablename__ = "user_requests"
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    request_type = Column(String(50), nullable=False)
-    request_data = Column(Text)
-    status = Column(String(20), nullable=False, default="pending")
-    response_data = Column(Text)
-    created_at = Column(DateTime, default=datetime.now)
-    completed_at = Column(DateTime)
-
-    user = relationship("User", back_populates="requests")
-
-    __table_args__ = (Index("idx_user_requests_user_id", "user_id"),)
-
-
-# Таблица для цен на металлы из разных источников
 class MetalPrice(Base):
     __tablename__ = "metal_prices"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     metal_type = Column(Enum(MetalType), nullable=False)
     timestamp = Column(DateTime, nullable=False)
-    open_price = Column(
-        Float, nullable=True
-    )  # Сделано nullable для периодов без данных, но отмеченных как проверенные
-    high_price = Column(
-        Float, nullable=True
-    )  # Сделано nullable для периодов без данных, но отмеченных как проверенные
-    low_price = Column(
-        Float, nullable=True
-    )  # Сделано nullable для периодов без данных, но отмеченных как проверенные
-    close_price = Column(
-        Float, nullable=True
-    )  # Сделано nullable для периодов без данных, но отмеченных как проверенные
+    open_price = Column(Float, nullable=True)
+    high_price = Column(Float, nullable=True)
+    low_price = Column(Float, nullable=True)
+    close_price = Column(Float, nullable=True)
     currency = Column(String(3), nullable=False, default="USD")
     source = Column(Enum(DataSource), nullable=False)
     created_at = Column(DateTime, default=datetime.now)
     is_checked = Column(
         Integer, nullable=False, default=1
-    )  # 1=проверено (даже если нет данных), 0=не проверено
+    )  # 1=проверено, 0=не проверено
     is_market_closed = Column(
         Integer, nullable=False, default=0
-    )  # 1=рынок закрыт (выходные/праздники), 0=нормально
+    )  # 1=рынок закрыт, 0=нормально
 
     __table_args__ = (
         Index("idx_metal_prices_metal_timestamp", "metal_type", "timestamp"),
@@ -108,18 +63,16 @@ class MetalPrice(Base):
     )
 
 
-# Новая таблица для конфигурации расписаний сборщика данных
 class CollectorSchedule(Base):
     __tablename__ = "collector_schedules"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     metal_type = Column(Enum(MetalType), nullable=False)
     source = Column(Enum(DataSource), nullable=False)
-    interval_type = Column(
-        String(10), nullable=False, default="hourly"
-    )  # hourly или daily
+    interval_type = Column(String(10), nullable=False, default="hourly")
     is_active = Column(Integer, nullable=False, default=1)  # 1=активно, 0=неактивно
     last_run = Column(DateTime)
+    last_triggered = Column(DateTime)
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
@@ -127,11 +80,11 @@ class CollectorSchedule(Base):
     def interval_minutes(self):
         """Возвращает интервал в минутах на основе interval_type"""
         if self.interval_type == "daily":
-            return 24 * 60  # 24 часа в минутах
+            return 24 * 60
         elif self.interval_type == "weekly":
-            return 7 * 24 * 60  # 7 дней в минутах
+            return 7 * 24 * 60
         else:
-            return 60  # 1 час в минутах
+            return 60
 
     __table_args__ = (
         Index("idx_collector_schedules_metal_source", "metal_type", "source"),
@@ -143,22 +96,14 @@ def drop_all_tables(engine):
     try:
         logger.info("Удаление всех существующих таблиц...")
         inspector = inspect(engine)
-
-        # Получение списка всех таблиц в базе данных
         all_tables = inspector.get_table_names()
 
-        # Удаление FOREIGN KEY ограничений перед удалением таблиц
         with engine.connect() as connection:
             transaction = connection.begin()
             try:
-                # Отключение проверки ограничений
                 connection.execute(text("SET FOREIGN_KEY_CHECKS=0;"))
-
-                # Удаление каждой таблицы
                 for table in all_tables:
                     connection.execute(text(f"DROP TABLE IF EXISTS {table};"))
-
-                # Включение проверки ограничений
                 connection.execute(text("SET FOREIGN_KEY_CHECKS=1;"))
                 transaction.commit()
                 logger.info(f"Успешно удалено {len(all_tables)} таблиц")
@@ -172,37 +117,27 @@ def drop_all_tables(engine):
 
 
 def init_database(force_reset_schedules=False):
-    """
-    Инициализация базы данных путем удаления и создания таблиц заново
-
-    Args:
-        force_reset_schedules (bool): Если True, существующие расписания будут удалены и созданы заново
-    """
-    # Создание соединения с базой данных используя SQLAlchemy
+    """Инициализация базы данных"""
     engine = create_engine(
         DB_URL,
         echo=False,
-        pool_pre_ping=True,  # Проверка соединения перед использованием
-        pool_recycle=3600,  # Обновление соединений через 1 час
+        pool_pre_ping=True,
+        pool_recycle=3600,
     )
 
-    # Удаление существующих таблиц
     try:
         drop_all_tables(engine)
         logger.info("Все таблицы успешно удалены")
     except Exception as e:
         logger.error(f"Не удалось удалить таблицы: {e}")
 
-    # Создание всех таблиц
     Base.metadata.create_all(engine)
     logger.info("Все таблицы успешно созданы")
 
-    # Создание сессии
     Session = sessionmaker(bind=engine)
     session = Session()
 
     try:
-        # Проверка успешного создания таблиц
         tables_count = len(Base.metadata.tables)
         existing_tables_count = 0
 
@@ -214,10 +149,7 @@ def init_database(force_reset_schedules=False):
             f"База данных инициализирована: {existing_tables_count} из {tables_count} таблиц существует"
         )
 
-        # Проверка и создание расписаний
         init_schedules(session, force_reset=force_reset_schedules)
-
-        # Применение изменений
         session.commit()
     except Exception as e:
         session.rollback()
@@ -227,44 +159,29 @@ def init_database(force_reset_schedules=False):
 
 
 def init_schedules(session, force_reset=False):
-    """
-    Инициализация расписаний сбора данных для каждой комбинации металла и источника
-
-    Args:
-        session: Сессия SQLAlchemy
-        force_reset (bool): Если True, существующие расписания будут удалены и созданы заново
-    """
+    """Инициализация расписаний сбора данных"""
     try:
-        # Проверяем, есть ли уже расписания в таблице
         existing_count = session.query(CollectorSchedule).count()
         logger.info(f"В базе найдено {existing_count} расписаний")
 
         if existing_count > 0 and force_reset:
-            # Удаляем все расписания
             session.query(CollectorSchedule).delete()
             session.commit()
             logger.info("Все существующие расписания удалены")
-            # Теперь создаем заново
             create_default_schedules(session)
         elif existing_count == 0:
-            # Если расписаний нет, создаем их
             create_default_schedules(session)
 
     except Exception as e:
         logger.error(f"Ошибка инициализации расписаний: {e}")
-        # Пытаемся восстановить структуру таблицы, если возникла ошибка
         try:
-            # Удаление и пересоздание таблицы
             engine = session.get_bind()
             with engine.connect() as connection:
                 connection.execute(text("DROP TABLE IF EXISTS collector_schedules"))
 
-            # Создаем таблицу заново
             if hasattr(Base.metadata.tables, "collector_schedules"):
                 Base.metadata.tables["collector_schedules"].create(engine)
                 logger.info("Таблица CollectorSchedule успешно пересоздана")
-
-                # Создаем начальные расписания после пересоздания таблицы
                 create_default_schedules(session)
             else:
                 logger.error("Не удалось найти определение таблицы collector_schedules")
@@ -273,49 +190,51 @@ def init_schedules(session, force_reset=False):
 
 
 def create_default_schedules(session):
-    """
-    Создает начальные расписания с часовым интервалом для каждого металла и источника
-
-    Args:
-        session: Сессия SQLAlchemy
-    """
+    """Создает расписания с часовым интервалом"""
     logger.info("Создание начальных расписаний с часовым интервалом")
 
-    # Создаем расписания для каждой комбинации металла и источника
     schedules_created = 0
 
-    for metal_type in MetalType:
-        for source in DataSource:
-            # Пропускаем некоторые невалидные комбинации
-            if source == DataSource.ALPHAVANTAGE_API and metal_type == MetalType.COPPER:
-                continue
+    metal_name_to_enum = {
+        "GOLD": MetalType.GOLD,
+        "COPPER": MetalType.COPPER,
+    }
 
-            # Создаем расписание с часовым интервалом
-            # По умолчанию активно только расписание для Gold из YFinance
-            is_active = (
-                1
-                if (metal_type == MetalType.GOLD and source == DataSource.YFINANCE)
-                else 0
-            )
+    for source_name, allowed_metals in SOURCE_METALS_CONFIG.items():
+        try:
+            source = DataSource[source_name]
 
-            schedule = CollectorSchedule(
-                metal_type=metal_type,
-                source=source,
-                interval_type="hourly",
-                is_active=is_active,
-            )
+            for metal_name in allowed_metals:
+                try:
+                    metal_type = metal_name_to_enum[metal_name]
+                    is_active = 1
 
-            session.add(schedule)
-            schedules_created += 1
+                    schedule = CollectorSchedule(
+                        metal_type=metal_type,
+                        source=source,
+                        interval_type="hourly",
+                        is_active=is_active,
+                    )
+
+                    session.add(schedule)
+                    schedules_created += 1
+                    logger.debug(
+                        f"Создано расписание для {metal_name} из {source_name}"
+                    )
+                except KeyError:
+                    logger.warning(f"Неизвестный металл: {metal_name}, пропускаем")
+                    continue
+        except KeyError:
+            logger.warning(f"Неизвестный источник данных: {source_name}, пропускаем")
+            continue
 
     session.commit()
     logger.info(
-        f"Создано {schedules_created} начальных расписаний с часовым интервалом"
+        f"Создано {schedules_created} начальных расписаний с часовым интервалом на основе конфигурации"
     )
 
 
 if __name__ == "__main__":
-    # При прямом запуске этого файла инициализируем базу данных
     logger.info("Запуск инициализации базы данных...")
     init_database()
     logger.info("Инициализация базы данных завершена!")

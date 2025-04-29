@@ -1,60 +1,34 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
-Scheduler runner script for the Precious Metals Analytics application.
-This script is intended to be run regularly (e.g. every hour via cron)
-to check and execute scheduled data collection tasks.
+Скрипт для запуска планировщика задач обновления данных о ценах на металлы.
+Выполняет проверку активных расписаний каждые 5 секунд и запускает задачи
+на обновление данных, если настало время.
 """
 
 import sys
 import os
 from loguru import logger
-import time
-from datetime import datetime
-
-# Add parent directory to path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-# Import project modules
 from database.data_collector import DataCollector
-from settings import LOG_DIR
 
-# Set up logging
-os.makedirs(LOG_DIR, exist_ok=True)
-log_file = os.path.join(LOG_DIR, f"scheduler_{datetime.now().strftime('%Y%m%d')}.log")
 
-# Configure logger
-logger.remove()  # Remove default handlers
+# Настройка логирования
+logger.remove()
 logger.add(
-    log_file,
-    rotation="1 day",
-    retention="30 days",
-    level="INFO",
-    format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",
+    sys.stdout,
+    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <level>{message}</level>",
 )
-logger.add(sys.stderr, level="INFO")
-
-
-def main():
-    """Run the scheduler to check and process scheduled tasks"""
-    start_time = time.time()
-    logger.info("=== Starting scheduled data collection task runner ===")
-
-    # Initialize data collector
-    collector = DataCollector()
-
-    # Run scheduled tasks
-    results = collector.run_scheduled_tasks()
-
-    if not results:
-        logger.info("No tasks were executed")
-    else:
-        logger.info(f"Tasks executed: {len(results)}")
-        for task, success in results.items():
-            logger.info(f"Task {task}: {'Success' if success else 'Failed'}")
-
-    elapsed_time = time.time() - start_time
-    logger.info(f"=== Scheduler finished in {elapsed_time:.2f} seconds ===")
-
 
 if __name__ == "__main__":
-    main()
+    logger.info("Запуск планировщика задач обновления данных о ценах на металлы")
+
+    try:
+        # Создаем экземпляр коллектора данных
+        collector = DataCollector()
+
+        # Запускаем планировщик (будет работать бесконечно, проверяя задачи каждые 5 секунд)
+        collector._run_task_scheduler()
+    except KeyboardInterrupt:
+        logger.warning("Планировщик остановлен пользователем (Ctrl+C)")
+    except Exception as e:
+        logger.error(f"Критическая ошибка: {e}")
+        sys.exit(1)
