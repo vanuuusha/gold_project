@@ -113,30 +113,9 @@ def initialize_db(reset_schedules=None):
         return f"Error initializing database: {str(e)}"
 
 
-@server.route("/initialize-schedules")
-@server.route("/initialize-schedules/<force_reset>")
-def initialize_schedules(force_reset=None):
-    try:
-        engine = create_engine(DB_URL)
-        Session = sessionmaker(bind=engine)
-        session = Session()
-
-        do_reset = force_reset == "true"
-        init_schedules(session, force_reset=do_reset)
-
-        session.close()
-        return "Schedules initialized successfully!" + (
-            " (with reset)" if do_reset else ""
-        )
-    except Exception as e:
-        logger.error(f"Scheduler initialization error: {e}")
-        return f"Error initializing schedules: {str(e)}"
-
-
 from views import register_callbacks
 
 
-# Создание callback для темы
 @app.callback(
     [
         Output("theme-store", "data", allow_duplicate=True),
@@ -187,7 +166,7 @@ if __name__ == "__main__":
         logger.info("Started background scheduler thread")
 
     server.run(
-        host=APP_CONFIG.get("host", "0.0.0.0"),
+        host="0.0.0.0",
         port=APP_CONFIG.get("port", 5001),
         debug=APP_CONFIG.get("debug", True),
     )

@@ -15,7 +15,6 @@ DB_URL = f"mysql+pymysql://{DB_CONFIG['user']}:{DB_CONFIG['password']}@{DB_CONFI
 APP_CONFIG = {
     "debug": True,
     "port": 5001,
-    "host": "0.0.0.0",
     "enable_scheduler": True,
 }
 
