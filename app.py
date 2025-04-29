@@ -3,7 +3,10 @@ import dash
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import flask
-from flask import Flask, redirect, url_for
+from flask import Flask, render_template, redirect, url_for
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
 from datetime import datetime, timedelta
 import os
 from loguru import logger
@@ -116,6 +119,7 @@ def initialize_db(reset_schedules=None):
 from views import register_callbacks
 
 
+# Создание callback для темы
 @app.callback(
     [
         Output("theme-store", "data", allow_duplicate=True),
@@ -166,7 +170,7 @@ if __name__ == "__main__":
         logger.info("Started background scheduler thread")
 
     server.run(
-        host="0.0.0.0",
+        host=APP_CONFIG.get("host", "0.0.0.0"),
         port=APP_CONFIG.get("port", 5001),
         debug=APP_CONFIG.get("debug", True),
     )
