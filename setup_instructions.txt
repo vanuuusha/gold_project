@@ -2,7 +2,6 @@
 
 ## 1. Настройка базы данных MySQL
 
-
 CREATE DATABASE gold;
 CREATE USER 'gold'@'localhost' IDENTIFIED BY 'gold';
 GRANT ALL PRIVILEGES ON gold.* TO 'gold'@'localhost';
